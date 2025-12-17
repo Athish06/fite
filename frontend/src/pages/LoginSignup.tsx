@@ -1,0 +1,180 @@
+import React, { useState } from 'react';
+import { Eye, EyeOff, Briefcase, HardHat, History } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const LoginSignup: React.FC = () => {
+    const [isLogin, setIsLogin] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+
+    return (
+        <div className="flex min-h-screen w-full flex-row bg-background-light dark:bg-background-dark">
+            {/* Left Panel: Visual Hero (Hidden on mobile) */}
+            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-end p-12 xl:p-24 overflow-hidden">
+                {/* Background Image */}
+                <div
+                    className="absolute inset-0 z-0 h-full w-full bg-cover bg-center"
+                    style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDASo8HGnWBSayl4Qtq-dpaWwvErTwsRTr9mbjJnIWKvRjvmbX4mltLWp-xmFtPErsvbYsjBSkJW2KNPJwvVQWFDvFDz-ocI8yGZ5Rgn_tpOBJtPYedMIulczp7aCIZfp_D8KUuNtWVrUzc43gaD68ZQ9RnDpbfgXxhy7ckvn4Dr9RRvI7DZdVuFU9dPvxyr5LJ9rQXSmre_bt9ujHojTYYog-Ug5bu094hs6sdkk0x0jWHgT8s_GwlS-U5osce5h4cAhk15OM-nXft")' }}
+                >
+                </div>
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 z-10 bg-[#181811]/70 bg-gradient-to-t from-[#181811] via-[#181811]/50 to-transparent"></div>
+
+                {/* Content */}
+                <div className="relative z-20 flex flex-col gap-6 max-w-xl">
+                    <div className="flex items-center gap-3 text-primary mb-2">
+                        <History size={36} />
+                        <h2 className="text-2xl font-bold tracking-tight">Hybrid Marketplace</h2>
+                    </div>
+                    <h1 className="text-white text-5xl font-black leading-tight tracking-[-0.033em]">
+                        One platform. <br />Every opportunity.
+                    </h1>
+                    <p className="text-gray-200 text-lg font-medium leading-relaxed max-w-md">
+                        From daily gigs to career moves. Access the dual marketplace for daily wages and long-term careers seamlessly.
+                    </p>
+                    <div className="flex gap-4 mt-4">
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10">
+                            <HardHat className="text-primary" size={20} />
+                            <span className="text-sm font-bold text-white">Daily Gigs</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10">
+                            <Briefcase className="text-primary" size={20} />
+                            <span className="text-sm font-bold text-white">Long-term Jobs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Panel: Form Area */}
+            <div className="flex flex-1 flex-col justify-center items-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24 bg-background-light dark:bg-background-dark relative overflow-y-auto">
+                {/* Mobile Header Logo (Visible only on small screens) */}
+                <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2 text-[#181811] dark:text-white">
+                    <History size={30} />
+                    <span className="font-bold text-lg">Hybrid Marketplace</span>
+                </div>
+
+                <div className="w-full max-w-md space-y-8">
+                    {/* Header Text */}
+                    <div className="text-left">
+                        <h2 className="mt-6 text-3xl font-black tracking-tight text-[#181811] dark:text-white">
+                            {isLogin ? 'Welcome back' : 'Create an account'}
+                        </h2>
+                        <p className="mt-2 text-sm text-gray-500 dark:text-[#bbbb9b]">
+                            {isLogin ? 'Please enter your details to access your account.' : 'Enter your details to get started.'}
+                        </p>
+                    </div>
+
+                    {/* Tabs: Sign In / Create Account */}
+                    <div className="border-b border-[#55553a]">
+                        <div className="flex gap-8">
+                            <button
+                                onClick={() => setIsLogin(true)}
+                                className={`flex items-center justify-center border-b-[3px] pb-3 pt-2 px-1 transition-colors ${isLogin
+                                        ? 'border-b-primary text-[#181811] dark:text-white'
+                                        : 'border-b-transparent hover:border-b-gray-500 text-gray-500 dark:text-[#bbbb9b]'
+                                    }`}
+                            >
+                                <span className="text-sm font-bold leading-normal tracking-[0.015em]">Sign In</span>
+                            </button>
+                            <button
+                                onClick={() => setIsLogin(false)}
+                                className={`flex items-center justify-center border-b-[3px] pb-3 pt-2 px-1 transition-colors ${!isLogin
+                                        ? 'border-b-primary text-[#181811] dark:text-white'
+                                        : 'border-b-transparent hover:border-b-gray-500 text-gray-500 dark:text-[#bbbb9b]'
+                                    }`}
+                            >
+                                <span className="text-sm font-bold leading-normal tracking-[0.015em]">Create Account</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Form */}
+                    <form className="flex flex-col gap-5 mt-8" onSubmit={(e) => e.preventDefault()}>
+                        {/* Email Field */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[#181811] dark:text-white text-base font-medium leading-normal" htmlFor="email">Email Address</label>
+                            <input
+                                className="form-input flex w-full min-w-0 resize-none overflow-hidden rounded-xl text-[#181811] dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#bbbb9b] bg-white dark:bg-surface-dark border border-gray-300 dark:border-[#55553a] focus:outline-0 focus:ring-2 focus:ring-primary/50 focus:border-primary h-14 p-[15px] text-base font-normal leading-normal transition-all"
+                                id="email"
+                                placeholder="name@example.com"
+                                required
+                                type="email"
+                            />
+                        </div>
+
+                        {/* Password Field */}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[#181811] dark:text-white text-base font-medium leading-normal" htmlFor="password">Password</label>
+                                {isLogin && <a className="text-sm font-semibold text-gray-600 dark:text-[#f9f906] hover:underline" href="#">Forgot password?</a>}
+                            </div>
+                            <div className="relative flex w-full items-stretch rounded-xl">
+                                <input
+                                    className="form-input flex w-full min-w-0 resize-none overflow-hidden rounded-xl text-[#181811] dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#bbbb9b] bg-white dark:bg-surface-dark border border-gray-300 dark:border-[#55553a] focus:outline-0 focus:ring-2 focus:ring-primary/50 focus:border-primary h-14 p-[15px] pr-12 text-base font-normal leading-normal transition-all"
+                                    id="password"
+                                    placeholder="Enter your password"
+                                    required
+                                    type={showPassword ? "text" : "password"}
+                                />
+                                <div
+                                    className="absolute right-0 top-0 bottom-0 flex items-center pr-4 text-gray-400 dark:text-[#bbbb9b] cursor-pointer"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <Link to="/" className="mt-2">
+                            <button
+                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-5 bg-primary hover:bg-[#dcdc05] text-[#181811] text-base font-bold leading-normal tracking-[0.015em] transition-colors shadow-[0_0_20px_rgba(249,249,6,0.15)]"
+                                type="submit"
+                            >
+                                {isLogin ? 'Log In' : 'Create Account'}
+                            </button>
+                        </Link>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="relative my-4">
+                        <div aria-hidden="true" className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300 dark:border-[#3a3a27]"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm font-medium leading-6">
+                            <span className="bg-background-light dark:bg-background-dark px-4 text-gray-500 dark:text-[#bbbb9b]">Or continue with</span>
+                        </div>
+                    </div>
+
+                    {/* Social Login */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <button className="flex items-center justify-center gap-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-300 dark:border-[#55553a] px-4 py-3 text-[#181811] dark:text-white hover:bg-gray-50 dark:hover:bg-[#3a3a27] transition-colors">
+                            <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
+                                <path d="M12.0003 20.45c4.6667 0 8.45-3.7833 8.45-8.45 0-4.6667-3.7833-8.45-8.45-8.45-4.6667 0-8.45 3.7833-8.45 8.45 0 4.6667 3.7833 8.45 8.45 8.45Z" fill="#fff" fillOpacity="0" stroke="currentColor" strokeWidth="0"></path>
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                            </svg>
+                            <span className="text-sm font-semibold">Google</span>
+                        </button>
+                        <button className="flex items-center justify-center gap-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-300 dark:border-[#55553a] px-4 py-3 text-[#181811] dark:text-white hover:bg-gray-50 dark:hover:bg-[#3a3a27] transition-colors">
+                            <svg aria-hidden="true" className="h-5 w-5 text-[#0077b5] fill-current" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path>
+                            </svg>
+                            <span className="text-sm font-semibold">LinkedIn</span>
+                        </button>
+                    </div>
+
+                    <p className="text-center text-sm text-gray-500 dark:text-[#bbbb9b] mt-6">
+                        By signing in, you agree to our{' '}
+                        <a className="font-bold text-[#181811] dark:text-white hover:text-primary underline decoration-2 decoration-primary/50 underline-offset-4" href="#">Terms of Service</a>{' '}
+                        and{' '}
+                        <a className="font-bold text-[#181811] dark:text-white hover:text-primary underline decoration-2 decoration-primary/50 underline-offset-4" href="#">Privacy Policy</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default LoginSignup;
