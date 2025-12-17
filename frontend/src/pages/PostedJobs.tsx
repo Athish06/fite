@@ -2,153 +2,283 @@ import React, { useState } from 'react';
 import { useMode } from '../context/ModeContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, List, Plus, MapPin, Clock, IndianRupee, Users, Sparkles, ArrowRight, Briefcase, X } from 'lucide-react';
-import Stepper, { Step } from '../components/ui/Stepper';
+import { LayoutGrid, List, Plus, MapPin, Clock, IndianRupee, Users, X, Briefcase, ChevronRight } from 'lucide-react';
+import TextType from '../components/ui/TextType';
 
-// Post Job Modal Component
-interface PostJobModalProps {
+// Slide-Over Drawer Component
+interface PostJobDrawerProps {
     isOpen: boolean;
     onClose: () => void;
     mode: 'daily' | 'longterm';
 }
 
-const PostJobModal: React.FC<PostJobModalProps> = ({ isOpen, onClose, mode }) => {
+const PostJobDrawer: React.FC<PostJobDrawerProps> = ({ isOpen, onClose, mode }) => {
     const isDaily = mode === 'daily';
+    const [currentStep, setCurrentStep] = useState(0);
+    const totalSteps = 4;
+
+    const steps = isDaily 
+        ? ['Details', 'Description', 'Location', 'Pay & Time']
+        : ['Details', 'Description', 'Requirements', 'Compensation'];
+
+    const handleNext = () => {
+        if (currentStep < totalSteps - 1) {
+            setCurrentStep(prev => prev + 1);
+        } else {
+            onClose();
+            setCurrentStep(0);
+        }
+    };
+
+    const handleBack = () => {
+        if (currentStep > 0) {
+            setCurrentStep(prev => prev - 1);
+        }
+    };
 
     return (
         <AnimatePresence>
             {isOpen && (
                 <>
+                    {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-md z-50"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
                         onClick={onClose}
                     />
+
+                    {/* Drawer */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(600px,90vw)] max-h-[85vh] z-50 rounded-3xl border ${isDaily ? 'border-emerald-500/20 bg-gradient-to-b from-[#0a120a] to-[#0a0f0a]' : 'border-amber-500/20 bg-gradient-to-b from-[#12100a] to-[#0f0d0a]'} shadow-2xl overflow-hidden`}
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                        className="fixed right-0 top-0 h-screen w-[500px] max-w-[90vw] bg-[#09090b] border-l border-zinc-800 z-50 flex flex-col"
                     >
+                        {/* Progress Line */}
+                        <div className="h-0.5 bg-zinc-800">
+                            <motion.div
+                                className={`h-full ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+                                transition={{ duration: 0.3 }}
+                            />
+                        </div>
+
                         {/* Header */}
-                        <div className={`flex items-center justify-between px-6 py-5 border-b border-white/5 ${isDaily ? 'bg-emerald-900/10' : 'bg-amber-900/10'}`}>
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDaily ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
-                                    <Briefcase size={20} className={isDaily ? 'text-emerald-400' : 'text-amber-400'} />
-                                </div>
-                                <div>
-                                    <div className="text-white font-bold">Post New Job</div>
-                                    <div className="text-white/50 text-sm">{isDaily ? 'Daily Wage Position' : 'Long-term Position'}</div>
-                                </div>
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
+                            <div>
+                                <h2 className="text-lg font-semibold text-zinc-100">Post New Job</h2>
+                                <p className="text-xs text-zinc-500 mt-0.5">{isDaily ? 'Daily Wage Position' : 'Long-term Position'}</p>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-xl hover:bg-white/5 text-white/60 hover:text-white transition-colors"
+                                className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
                             >
-                                <X size={22} />
+                                <X size={20} />
                             </button>
                         </div>
 
-                        {/* Stepper Content */}
-                        <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
-                            <Stepper
-                                onFinalStepCompleted={onClose}
+                        {/* Step Indicators */}
+                        <div className="px-6 py-4 border-b border-zinc-800/50">
+                            <div className="flex items-center gap-2">
+                                {steps.map((step, index) => (
+                                    <React.Fragment key={step}>
+                                        <span className={`text-xs font-medium ${index <= currentStep ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                                            {step}
+                                        </span>
+                                        {index < steps.length - 1 && (
+                                            <ChevronRight size={12} className="text-zinc-700" />
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Form Content */}
+                        <div className="flex-1 overflow-y-auto px-6 py-6">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentStep}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="space-y-5"
+                                >
+                                    {currentStep === 0 && (
+                                        <>
+                                            <div>
+                                                <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                    Job Title
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder={isDaily ? "e.g., Plumbing Work" : "e.g., Frontend Developer"}
+                                                    className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                    Category
+                                                </label>
+                                                <select className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all cursor-pointer">
+                                                    <option value="" className="bg-zinc-900">Select Category</option>
+                                                    {isDaily ? (
+                                                        <>
+                                                            <option value="plumbing" className="bg-zinc-900">Plumbing</option>
+                                                            <option value="electrical" className="bg-zinc-900">Electrical</option>
+                                                            <option value="painting" className="bg-zinc-900">Painting</option>
+                                                            <option value="cleaning" className="bg-zinc-900">Cleaning</option>
+                                                            <option value="moving" className="bg-zinc-900">Moving & Labor</option>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <option value="fulltime" className="bg-zinc-900">Full-time</option>
+                                                            <option value="parttime" className="bg-zinc-900">Part-time</option>
+                                                            <option value="internship" className="bg-zinc-900">Internship</option>
+                                                            <option value="contract" className="bg-zinc-900">Contract</option>
+                                                        </>
+                                                    )}
+                                                </select>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {currentStep === 1 && (
+                                        <div>
+                                            <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                Description
+                                            </label>
+                                            <textarea
+                                                placeholder={isDaily ? "Describe the work in detail..." : "Describe the role and responsibilities..."}
+                                                rows={8}
+                                                className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all resize-none"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {currentStep === 2 && (
+                                        <>
+                                            {isDaily ? (
+                                                <>
+                                                    <div>
+                                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                            Address
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter address or landmark"
+                                                            className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                    <button className="w-full py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 text-sm flex items-center justify-center gap-2 hover:bg-zinc-700 hover:text-zinc-300 transition-colors">
+                                                        <MapPin size={16} />
+                                                        Use current location
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div>
+                                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                            Requirements
+                                                        </label>
+                                                        <textarea
+                                                            placeholder="List requirements (one per line)"
+                                                            rows={5}
+                                                            className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all resize-none"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                            Experience
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="e.g., 2+ years"
+                                                            className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {currentStep === 3 && (
+                                        <>
+                                            <div>
+                                                <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                    {isDaily ? 'Daily Wage (₹)' : 'Salary Range'}
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder={isDaily ? "e.g., 800" : "e.g., 8-12 LPA"}
+                                                    className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            {isDaily ? (
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                            Start Time
+                                                        </label>
+                                                        <input
+                                                            type="time"
+                                                            className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                            End Time
+                                                        </label>
+                                                        <input
+                                                            type="time"
+                                                            className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                                                        Location
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="e.g., Bangalore / Remote"
+                                                        className="w-full bg-zinc-900/50 border-none rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-zinc-600 focus:outline-none transition-all"
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="px-6 py-4 border-t border-zinc-800 flex items-center gap-3">
+                            {currentStep > 0 && (
+                                <button
+                                    onClick={handleBack}
+                                    className="px-5 py-2.5 rounded-lg bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors"
+                                >
+                                    Back
+                                </button>
+                            )}
+                            <button
+                                onClick={handleNext}
+                                className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                                    currentStep === totalSteps - 1
+                                        ? isDaily
+                                            ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+                                            : 'bg-amber-600 text-white hover:bg-amber-500'
+                                        : 'bg-white text-black hover:bg-zinc-200'
+                                }`}
                             >
-                                {isDaily ? (
-                                    <>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Job Details</label>
-                                                <input type="text" placeholder="Job Title (e.g., Plumbing Work)" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-emerald-500/50 focus:outline-none" />
-                                                <select className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer">
-                                                    <option value="" className="bg-neutral-900">Select Category</option>
-                                                    <option value="plumbing" className="bg-neutral-900">Plumbing</option>
-                                                    <option value="electrical" className="bg-neutral-900">Electrical</option>
-                                                    <option value="painting" className="bg-neutral-900">Painting</option>
-                                                    <option value="cleaning" className="bg-neutral-900">Cleaning</option>
-                                                    <option value="moving" className="bg-neutral-900">Moving & Labor</option>
-                                                </select>
-                                            </div>
-                                        </Step>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Description</label>
-                                                <textarea placeholder="Describe the work in detail..." className="w-full h-40 p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-emerald-500/50 focus:outline-none resize-none" />
-                                            </div>
-                                        </Step>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Location</label>
-                                                <input type="text" placeholder="Enter address or landmark" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-emerald-500/50 focus:outline-none" />
-                                                <button className="w-full p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center justify-center gap-2 hover:bg-emerald-500/20 transition-colors">
-                                                    <MapPin size={16} />
-                                                    Use current location
-                                                </button>
-                                            </div>
-                                        </Step>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Pay & Timing</label>
-                                                <div className="flex items-center gap-3">
-                                                    <IndianRupee size={20} className="text-white/50" />
-                                                    <input type="number" placeholder="Daily wage (₹)" className="flex-1 p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-emerald-500/50 focus:outline-none" />
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div>
-                                                        <label className="text-white/50 text-xs mb-1 block">Start Time</label>
-                                                        <input type="time" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:outline-none" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-white/50 text-xs mb-1 block">End Time</label>
-                                                        <input type="time" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:outline-none" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </Step>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Job Details</label>
-                                                <input type="text" placeholder="Job Title (e.g., Frontend Developer)" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:outline-none" />
-                                                <select className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white focus:border-amber-500/50 focus:outline-none appearance-none cursor-pointer">
-                                                    <option value="" className="bg-neutral-900">Select Job Type</option>
-                                                    <option value="fulltime" className="bg-neutral-900">Full-time</option>
-                                                    <option value="parttime" className="bg-neutral-900">Part-time</option>
-                                                    <option value="internship" className="bg-neutral-900">Internship</option>
-                                                    <option value="contract" className="bg-neutral-900">Contract</option>
-                                                </select>
-                                            </div>
-                                        </Step>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Description</label>
-                                                <textarea placeholder="Describe the role and responsibilities..." className="w-full h-40 p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:outline-none resize-none" />
-                                            </div>
-                                        </Step>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Requirements</label>
-                                                <textarea placeholder="List requirements (one per line)" className="w-full h-32 p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:outline-none resize-none" />
-                                                <input type="text" placeholder="Minimum experience (e.g., 2 years)" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:outline-none" />
-                                            </div>
-                                        </Step>
-                                        <Step>
-                                            <div className="space-y-4">
-                                                <label className="text-white/70 text-sm font-medium">Compensation</label>
-                                                <div className="flex items-center gap-3">
-                                                    <IndianRupee size={20} className="text-white/50" />
-                                                    <input type="text" placeholder="Salary range (e.g., 8-12 LPA)" className="flex-1 p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:outline-none" />
-                                                </div>
-                                                <input type="text" placeholder="Location / Remote option" className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:outline-none" />
-                                            </div>
-                                        </Step>
-                                    </>
-                                )}
-                            </Stepper>
+                                {currentStep === totalSteps - 1 ? 'Post Job' : 'Continue'}
+                            </button>
                         </div>
                     </motion.div>
                 </>
@@ -157,11 +287,33 @@ const PostJobModal: React.FC<PostJobModalProps> = ({ isOpen, onClose, mode }) =>
     );
 };
 
+// Sparkline Component (Static SVG for now)
+const Sparkline: React.FC<{ trend: 'up' | 'down' | 'stable' }> = ({ trend }) => {
+    const paths = {
+        up: "M0,16 L8,14 L16,10 L24,12 L32,6 L40,8 L48,4",
+        down: "M0,4 L8,6 L16,8 L24,5 L32,10 L40,14 L48,12",
+        stable: "M0,10 L8,8 L16,12 L24,9 L32,11 L40,8 L48,10"
+    };
+
+    return (
+        <svg width="48" height="20" viewBox="0 0 48 20" className="opacity-60">
+            <path
+                d={paths[trend]}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+};
+
 const PostedJobs: React.FC = () => {
     const { mode } = useMode();
     const navigate = useNavigate();
     const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
-    const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     const isDaily = mode === 'daily';
 
@@ -175,17 +327,19 @@ const PostedJobs: React.FC = () => {
             time: "9 AM - 6 PM",
             applicants: 12,
             status: "active",
-            postedAt: "2 hours ago"
+            postedAt: "2h ago",
+            trend: 'up' as const
         },
         {
             id: 2,
             title: "Event Helper",
             location: "Palace Grounds, Bangalore",
-            pay: "₹1200/day",
+            pay: "₹1,200/day",
             time: "2 PM - 11 PM",
             applicants: 8,
             status: "active",
-            postedAt: "5 hours ago"
+            postedAt: "5h ago",
+            trend: 'stable' as const
         },
         {
             id: 3,
@@ -195,7 +349,8 @@ const PostedJobs: React.FC = () => {
             time: "8 AM - 5 PM",
             applicants: 5,
             status: "active",
-            postedAt: "1 day ago"
+            postedAt: "1d ago",
+            trend: 'down' as const
         }
     ];
 
@@ -208,7 +363,8 @@ const PostedJobs: React.FC = () => {
             type: "Internship",
             applicants: 45,
             status: "active",
-            postedAt: "3 days ago"
+            postedAt: "3d ago",
+            trend: 'up' as const
         },
         {
             id: 2,
@@ -218,7 +374,8 @@ const PostedJobs: React.FC = () => {
             type: "Full-time",
             applicants: 23,
             status: "active",
-            postedAt: "1 week ago"
+            postedAt: "1w ago",
+            trend: 'stable' as const
         },
         {
             id: 3,
@@ -228,7 +385,8 @@ const PostedJobs: React.FC = () => {
             type: "Full-time",
             applicants: 18,
             status: "active",
-            postedAt: "1 week ago"
+            postedAt: "1w ago",
+            trend: 'up' as const
         }
     ];
 
@@ -243,61 +401,80 @@ const PostedJobs: React.FC = () => {
     };
 
     return (
-        <div className="w-full min-h-screen">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
+            {/* Background Pattern */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-gray-100 dark:bg-neutral-900" style={{ left: 0, right: 0 }}>
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-25 brightness-100 contrast-150"></div>
+                <div className={`absolute top-[-30%] right-[-20%] w-[80%] h-[80%] rounded-full ${isDaily ? 'bg-green-500/10' : 'bg-yellow-500/10'} blur-[140px]`} />
+                <div className={`absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full ${isDaily ? 'bg-emerald-500/8' : 'bg-orange-500/8'} blur-[120px]`} />
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] rounded-full ${isDaily ? 'bg-green-400/5' : 'bg-yellow-400/5'} blur-[160px]`} />
+            </div>
+
+            {/* Header Toolbar */}
+            <div className="relative z-10 flex items-center justify-between mb-8">
+                {/* Left: Title with Typewriter */}
                 <div>
-                    <h1 className="text-4xl font-bold text-neutral-800 dark:text-neutral-200 mb-2">
-                        Posted Jobs
+                    <h1 className="text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200">
+                        <TextType
+                            text="Posted Jobs"
+                            typingSpeed={80}
+                            loop={false}
+                            showCursor={false}
+                        />
                     </h1>
-                    <p className="text-neutral-600 dark:text-neutral-400">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
                         {isDaily ? "Manage your daily wage job listings" : "Track your long-term job postings"}
                     </p>
                 </div>
 
+                {/* Right: Control Bar */}
                 <div className="flex items-center gap-3">
-                    {/* View Toggle */}
-                    <div className="flex items-center gap-1 p-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-white/10">
+                    {/* View Switcher - Segmented Control */}
+                    <div className="relative flex items-center p-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700">
+                        <motion.div
+                            layoutId="viewToggle"
+                            className="absolute h-8 rounded-md bg-white dark:bg-neutral-700 shadow-sm"
+                            initial={false}
+                            animate={{
+                                x: viewMode === 'card' ? 4 : 44,
+                                width: 36
+                            }}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
                         <button
                             onClick={() => setViewMode('card')}
-                            className={`p-2 rounded-md transition-all ${
-                                viewMode === 'card'
-                                    ? 'bg-white dark:bg-neutral-700 shadow-sm'
-                                    : 'hover:bg-neutral-100 dark:hover:bg-neutral-700/50'
+                            className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${
+                                viewMode === 'card' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-500 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-400'
                             }`}
                         >
-                            <LayoutGrid size={18} className="text-neutral-700 dark:text-neutral-300" />
+                            <LayoutGrid size={16} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-md transition-all ${
-                                viewMode === 'list'
-                                    ? 'bg-white dark:bg-neutral-700 shadow-sm'
-                                    : 'hover:bg-neutral-100 dark:hover:bg-neutral-700/50'
+                            className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${
+                                viewMode === 'list' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-500 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-400'
                             }`}
                         >
-                            <List size={18} className="text-neutral-700 dark:text-neutral-300" />
+                            <List size={16} />
                         </button>
                     </div>
 
-                    {/* Add Job Button */}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsPostModalOpen(true)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-white transition-all shadow-lg ${
-                            isDaily
-                                ? 'bg-green-500 hover:bg-green-600'
-                                : 'bg-yellow-500 hover:bg-yellow-600'
+                    {/* Post Button */}
+                    <button
+                        onClick={() => setIsDrawerOpen(true)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                            isDaily 
+                                ? 'bg-green-500 text-white hover:bg-green-600' 
+                                : 'bg-yellow-500 text-black hover:bg-yellow-600'
                         }`}
                     >
-                        <Plus size={20} />
+                        <Plus size={16} />
                         Post Job
-                    </motion.button>
+                    </button>
                 </div>
             </div>
 
-            {/* Jobs Grid */}
+            {/* Jobs Grid/List */}
             <AnimatePresence mode="wait">
                 {viewMode === 'card' ? (
                     <motion.div
@@ -305,7 +482,7 @@ const PostedJobs: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+                        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
                     >
                         {currentJobs.map((job, index) => (
                             <motion.div
@@ -314,59 +491,55 @@ const PostedJobs: React.FC = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                                 onClick={() => handleJobClick(job.id)}
-                                className={`group relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 bg-white dark:bg-neutral-800 border-2 ${
-                                    isDaily 
-                                        ? 'border-green-200 dark:border-green-900/30 hover:shadow-xl' 
-                                        : 'border-yellow-200 dark:border-yellow-900/30 hover:shadow-xl'
-                                }`}
+                                className="group relative cursor-pointer p-5 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all duration-300 shadow-sm hover:shadow-md"
                             >
-                                {/* Magic Bento glow effect */}
-                                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br ${isDaily ? 'from-green-500/5 via-transparent to-emerald-500/10' : 'from-yellow-500/5 via-transparent to-orange-500/10'}`} />
-                                
-                                <div className="relative p-6">
-                                    {/* Header */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex-1">
-                                            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-3 ${isDaily ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'}`}>
-                                                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDaily ? 'bg-green-600 dark:bg-green-400' : 'bg-yellow-600 dark:bg-yellow-400'}`} />
-                                                {job.status}
-                                            </div>
-                                            <h3 className={`text-xl font-bold text-neutral-800 dark:text-neutral-200 group-hover:${isDaily ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'} transition-colors mb-1`}>
-                                                {job.title}
-                                            </h3>
-                                        </div>
-                                        <div className={`p-2 rounded-xl ${isDaily ? 'bg-green-100 dark:bg-green-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20'} group-hover:scale-110 transition-transform`}>
-                                            <ArrowRight size={18} className={isDaily ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'} />
-                                        </div>
-                                    </div>
+                                {/* Colored Accent Line */}
+                                <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${
+                                    isDaily ? 'bg-emerald-500' : 'bg-amber-500'
+                                }`} />
 
-                                    {/* Details */}
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                                            <MapPin size={16} />
-                                            <span>{job.location}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <IndianRupee size={16} />
-                                            <span className={`font-bold ${isDaily ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>{job.pay}</span>
+                                {/* Header */}
+                                <div className="flex items-start justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 pr-3">
+                                        {job.title}
+                                    </h3>
+                                    <span className="shrink-0 text-xs px-2 py-0.5 rounded-md border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-400 capitalize">
+                                        {job.status}
+                                    </span>
+                                </div>
+
+                                {/* Metrics Row */}
+                                <div className="space-y-2 mb-4">
+                                    <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                                        <MapPin size={14} className="text-neutral-500 dark:text-neutral-500" />
+                                        <span>{job.location}</span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+                                            <IndianRupee size={14} className="text-neutral-500 dark:text-neutral-500" />
+                                            <span className="font-medium">{job.pay}</span>
                                         </div>
                                         {isDaily && 'time' in job && (
                                             <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                                                <Clock size={16} />
+                                                <Clock size={14} className="text-neutral-500 dark:text-neutral-500" />
                                                 <span>{job.time}</span>
                                             </div>
                                         )}
                                     </div>
+                                </div>
 
-                                    {/* Footer */}
-                                    <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-white/10">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <Users size={16} className="text-neutral-500 dark:text-neutral-400" />
-                                            <span className="font-bold text-neutral-800 dark:text-neutral-200">{job.applicants}</span>
-                                            <span className="text-neutral-500 dark:text-neutral-400">applicants</span>
+                                {/* Footer */}
+                                <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <Users size={14} className="text-neutral-500 dark:text-neutral-500" />
+                                            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{job.applicants} Applicants</span>
                                         </div>
-                                        <span className="text-xs text-neutral-500 dark:text-neutral-400">{job.postedAt}</span>
+                                        <div className={isDaily ? 'text-emerald-500' : 'text-amber-500'}>
+                                            <Sparkline trend={job.trend} />
+                                        </div>
                                     </div>
+                                    <span className="text-xs text-neutral-500 dark:text-neutral-500">{job.postedAt}</span>
                                 </div>
                             </motion.div>
                         ))}
@@ -377,8 +550,17 @@ const PostedJobs: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="space-y-3"
+                        className="space-y-2"
                     >
+                        {/* Table Header */}
+                        <div className="grid grid-cols-12 gap-4 px-5 py-3 text-[11px] uppercase tracking-wider font-semibold text-zinc-600">
+                            <div className="col-span-4">Job Title</div>
+                            <div className="col-span-3">Location</div>
+                            <div className="col-span-2">Pay</div>
+                            <div className="col-span-2">Applicants</div>
+                            <div className="col-span-1 text-right">Posted</div>
+                        </div>
+
                         {currentJobs.map((job, index) => (
                             <motion.div
                                 key={job.id}
@@ -386,53 +568,31 @@ const PostedJobs: React.FC = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
                                 onClick={() => handleJobClick(job.id)}
-                                className={`group cursor-pointer p-5 rounded-2xl backdrop-blur-sm transition-all duration-200 hover:translate-x-2 ${
-                                    isDaily
-                                        ? 'bg-emerald-900/10 border border-emerald-500/10 hover:border-emerald-500/30 hover:bg-emerald-900/20'
-                                        : 'bg-amber-900/10 border border-amber-500/10 hover:border-amber-500/30 hover:bg-amber-900/20'
-                                }`}
+                                className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all duration-200"
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-5 flex-1">
-                                        <div className={`p-3 rounded-2xl ${isDaily ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
-                                            <Briefcase size={20} className={isDaily ? 'text-emerald-400' : 'text-amber-400'} />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="text-lg font-bold text-white">{job.title}</h3>
-                                                <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
-                                                    isDaily ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
-                                                }`}>
-                                                    {job.status}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-5 text-sm text-white/50">
-                                                <span className="flex items-center gap-1.5">
-                                                    <MapPin size={13} />
-                                                    {job.location}
-                                                </span>
-                                                <span className={`flex items-center gap-1.5 font-semibold ${isDaily ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                                    <IndianRupee size={13} />
-                                                    {job.pay}
-                                                </span>
-                                                {isDaily && 'time' in job && (
-                                                    <span className="flex items-center gap-1.5">
-                                                        <Clock size={13} />
-                                                        {job.time}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
+                                {/* Accent dot */}
+                                <div className="col-span-4 flex items-center gap-3">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                    <div>
+                                        <div className="text-sm font-medium text-zinc-100">{job.title}</div>
+                                        <span className="text-xs text-zinc-600 capitalize">{job.status}</span>
                                     </div>
-                                    <div className="flex items-center gap-8">
-                                        <div className="flex items-center gap-2">
-                                            <Users size={16} className="text-white/40" />
-                                            <span className="font-bold text-white">{job.applicants}</span>
-                                            <span className="text-sm text-white/40">applicants</span>
-                                        </div>
-                                        <span className="text-xs text-white/30 w-20 text-right">{job.postedAt}</span>
-                                        <ArrowRight size={18} className={`opacity-0 group-hover:opacity-100 transition-opacity ${isDaily ? 'text-emerald-400' : 'text-amber-400'}`} />
+                                </div>
+                                <div className="col-span-3 flex items-center gap-2 text-sm text-zinc-500">
+                                    <MapPin size={12} className="text-zinc-600" />
+                                    <span className="truncate">{job.location}</span>
+                                </div>
+                                <div className="col-span-2 text-sm font-medium text-zinc-400">
+                                    {job.pay}
+                                </div>
+                                <div className="col-span-2 flex items-center gap-2">
+                                    <span className="text-sm text-zinc-300">{job.applicants}</span>
+                                    <div className={isDaily ? 'text-emerald-500' : 'text-amber-500'}>
+                                        <Sparkline trend={job.trend} />
                                     </div>
+                                </div>
+                                <div className="col-span-1 text-xs text-zinc-600 text-right">
+                                    {job.postedAt}
                                 </div>
                             </motion.div>
                         ))}
@@ -440,11 +600,11 @@ const PostedJobs: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            {/* Post Job Modal */}
-            <PostJobModal 
-                isOpen={isPostModalOpen} 
-                onClose={() => setIsPostModalOpen(false)} 
-                mode={isDaily ? 'daily' : 'longterm'} 
+            {/* Post Job Drawer */}
+            <PostJobDrawer
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                mode={isDaily ? 'daily' : 'longterm'}
             />
         </div>
     );

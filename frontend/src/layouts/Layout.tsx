@@ -42,25 +42,25 @@ const Layout: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 relative overflow-hidden">
-            {/* Background effects */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-                <div className={mode === 'daily'
-                    ? "absolute top-[-50%] left-[-20%] w-[80%] h-[80%] rounded-full bg-green-500/10 blur-[120px]"
-                    : "absolute top-[-50%] left-[-20%] w-[80%] h-[80%] rounded-full bg-yellow-500/10 blur-[120px]"
-                }></div>
+        <div className="min-h-screen bg-[#09090b] relative overflow-hidden">
+            {/* Subtle gradient orbs */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className={`absolute top-[-40%] right-[-20%] w-[60%] h-[60%] rounded-full blur-[150px] ${
+                    mode === 'daily' ? 'bg-emerald-500/5' : 'bg-amber-500/5'
+                }`} />
+                <div className={`absolute bottom-[-30%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] ${
+                    mode === 'daily' ? 'bg-emerald-600/3' : 'bg-amber-600/3'
+                }`} />
             </div>
 
             {/* Navigation Toggle Button */}
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`fixed top-6 left-6 z-50 p-3 rounded-xl border shadow-md backdrop-blur-sm transition-all duration-300 ${
+                className={`fixed top-6 left-6 z-50 p-2.5 rounded-lg border transition-all duration-200 ${
                     isOpen 
-                        ? 'bg-neutral-700 border-neutral-600 text-white' 
-                        : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700'
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100' 
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-300 hover:border-zinc-700'
                 }`}
-                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
                 <AnimatePresence mode="wait">
@@ -103,77 +103,78 @@ const Layout: React.FC = () => {
 
                         {/* Nav Dropdown */}
                         <motion.nav
-                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                            initial={{ opacity: 0, y: -10, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="fixed top-20 left-6 z-50 w-72 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-xl overflow-hidden"
+                            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+                            className="fixed top-[72px] left-6 z-50 w-64 rounded-xl border border-zinc-800 bg-[#121212] shadow-2xl overflow-hidden"
                         >
                             {/* Logo/Brand */}
-                            <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+                            <div className="px-5 py-4 border-b border-zinc-800">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg font-black ${mode === 'daily' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'}`}>
+                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold ${
+                                        mode === 'daily' ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
+                                    }`}>
                                         F
                                     </div>
                                     <div>
-                                        <div className="text-neutral-900 dark:text-white font-bold text-lg">FITE</div>
-                                        <div className="text-neutral-500 dark:text-neutral-400 text-xs">Find • Work • Grow</div>
+                                        <div className="text-zinc-100 font-semibold text-sm">FITE</div>
+                                        <div className="text-zinc-600 text-[11px]">Find • Work • Grow</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Nav Items */}
-                            <div className="p-3 space-y-1">
+                            <div className="p-2 space-y-0.5">
                                 {navItems.map((item, index) => {
                                     const active = isActive(item.href);
                                     return (
                                         <motion.button
                                             key={item.href}
-                                            initial={{ opacity: 0, x: -20 }}
+                                            initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: index * 0.05 }}
+                                            transition={{ delay: index * 0.04 }}
                                             onClick={() => {
                                                 setIsOpen(false);
                                                 navigate(item.href);
                                             }}
-                                            className={`group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative ${
+                                            className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative ${
                                                 active
-                                                    ? mode === 'daily'
-                                                        ? 'bg-green-500 text-white shadow-md'
-                                                        : 'bg-yellow-500 text-black shadow-md'
-                                                    : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
+                                                    ? 'bg-zinc-800 text-zinc-100'
+                                                    : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300'
                                             }`}
                                         >
-                                            <span className={`transition-transform duration-200 ${active ? '' : 'group-hover:scale-110'}`}>
-                                                {item.icon}
-                                            </span>
-                                            <span className="font-semibold flex-1 text-left">{item.label}</span>
-                                            
+                                            {/* Active indicator */}
                                             {active && (
-                                                <ChevronRight size={16} />
+                                                <div className={`absolute left-0 top-2 bottom-2 w-0.5 rounded-full ${
+                                                    mode === 'daily' ? 'bg-emerald-500' : 'bg-amber-500'
+                                                }`} />
                                             )}
+                                            <span className="ml-1">{item.icon}</span>
+                                            <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
+                                            {active && <ChevronRight size={14} className="text-zinc-600" />}
                                         </motion.button>
                                     );
                                 })}
                             </div>
 
                             {/* Profile */}
-                            <div className="p-3 border-t border-neutral-200 dark:border-neutral-700">
+                            <div className="p-2 border-t border-zinc-800">
                                 <button
                                     onClick={() => {
                                         setIsOpen(false);
                                         navigate('/profile');
                                     }}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-800/50 transition-colors"
                                 >
                                     <img
                                         src="https://i.pravatar.cc/150?img=3"
-                                        className="h-10 w-10 rounded-full object-cover ring-2 ring-neutral-200 dark:ring-neutral-600"
+                                        className="h-8 w-8 rounded-full object-cover ring-1 ring-zinc-700"
                                         alt="Avatar"
                                     />
                                     <div className="text-left flex-1">
-                                        <div className="text-neutral-900 dark:text-white font-semibold text-sm">Athish</div>
-                                        <div className="text-neutral-500 dark:text-neutral-400 text-xs">View Profile</div>
+                                        <div className="text-zinc-300 font-medium text-sm">Athish</div>
+                                        <div className="text-zinc-600 text-[11px]">View Profile</div>
                                     </div>
                                 </button>
                             </div>

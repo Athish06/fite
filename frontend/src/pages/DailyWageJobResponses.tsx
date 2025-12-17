@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, MapPin, IndianRupee, Clock, Phone, Navigation } from 'lucide-react';
+import { ChevronLeft, ChevronDown, MapPin, IndianRupee, Clock, Phone, Navigation, Plus, Minus, X, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JobMap from '../components/JobMap';
 
@@ -26,6 +26,10 @@ const DailyWageJobResponses: React.FC = () => {
     const [negotiationPrice, setNegotiationPrice] = useState(800);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const canvasRef = useRef<HTMLDivElement>(null);
+
+    const incrementPrice = (amount: number) => {
+        setNegotiationPrice((prev) => Math.max(0, prev + amount));
+    };
 
     const jobLocation = { lat: 12.9716, lng: 77.5946 };
 
@@ -81,208 +85,250 @@ const DailyWageJobResponses: React.FC = () => {
                 <JobMap jobs={mapJobs} center={[jobLocation.lat, jobLocation.lng]} zoom={13.5} showControls />
             </div>
             
-            {/* Back Button */}
-            <div className="fixed top-4 left-4 z-20">
+            {/* Back Button - Updated Style */}
+            <div className="fixed top-6 left-6 z-20">
                 <button
                     onClick={() => navigate(-1)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg border border-black/5 text-sm font-semibold hover:shadow-xl transition-all hover:scale-105"
+                    className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border-2 border-neutral-300 text-neutral-700 text-sm font-semibold hover:bg-neutral-50 transition-all shadow-lg"
                 >
-                    <ChevronLeft size={18} /> Back
+                    <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+                    <span>Back</span>
                 </button>
             </div>
 
-            {/* Negotiation Panel */}
-            <div className="fixed left-4 bottom-4 z-30 w-[min(420px,calc(100%-2rem))]">
-                <motion.div
-                    layout
-                    drag={isCollapsed}
-                    dragConstraints={canvasRef}
-                    dragMomentum={false}
-                    className={`rounded-3xl border ${isCollapsed ? 'border-emerald-500/60 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'border-emerald-900/30'} bg-[#0a120a]/95 backdrop-blur-xl text-white shadow-[0_25px_80px_rgba(0,0,0,0.5)] overflow-hidden ${isCollapsed ? 'w-14 h-14 flex items-center justify-center cursor-grab active:cursor-grabbing' : ''}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ type: 'spring', stiffness: 160, damping: 20 }}
-                >
-                    {isCollapsed ? (
-                        <button
-                            onClick={() => setIsCollapsed(false)}
-                            className="w-full h-full flex items-center justify-center"
-                            aria-label="Expand negotiation"
-                        >
-                            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-emerald-600 shadow-lg">
-                                <span className="text-white text-sm font-semibold">↕</span>
-                                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 shadow" />
-                            </div>
-                        </button>
-                    ) : (
-                        <>
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-gradient-to-r from-emerald-900/60 to-emerald-800/40">
-                                <div>
-                                    <div className="text-xs text-emerald-100/80">Current status</div>
-                                    <div className="text-lg font-semibold text-white">{statusLabel}</div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-900 text-emerald-100 border border-emerald-700/60">
-                                        {status.toUpperCase()}
-                                    </span>
-                                    <button
-                                        onClick={() => setIsCollapsed(true)}
-                                        className="p-2 rounded-full hover:bg-white/5 text-white"
-                                        aria-label="Minimize"
-                                    >
-                                        <ChevronDown size={18} />
-                                    </button>
-                                </div>
-                            </div>
+            {/* Status Pill (when not negotiating) */}
+            <AnimatePresence>
+                {status !== 'negotiating' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed top-6 left-1/2 -translate-x-1/2 z-20"
+                    >
+                        <div className="px-6 py-3 rounded-full bg-white/90 backdrop-blur-md border border-neutral-200 shadow-lg flex items-center gap-3">
+                            {status === 'searching' && (
+                                <>
+                                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                                    <span className="text-sm font-medium text-neutral-700">Finding nearby workers...</span>
+                                </>
+                            )}
+                            {status === 'confirmed' && (
+                                <>
+                                    <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                                    <span className="text-sm font-medium text-neutral-700">Worker Confirmed</span>
+                                </>
+                            )}
+                            {status === 'in-progress' && (
+                                <>
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                    <span className="text-sm font-medium text-neutral-700">Job in Progress</span>
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                            <AnimatePresence initial={false}>
-                                <motion.div
-                                    key={status}
-                                    initial={{ opacity: 0, y: 12 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 12 }}
-                                    transition={{ duration: 0.18 }}
-                                    className="p-4 space-y-4"
-                                >
-                                    {status === 'searching' && (
+            {/* Negotiation Modal */}
+            <AnimatePresence>
+                {status === 'negotiating' && selectedWorker && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                        />
+
+                        {/* Modal */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-50"
+                        >
+                            <div className="rounded-2xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-2xl overflow-hidden">
+                                {/* Header */}
+                                <div className="px-6 py-5 bg-emerald-500/10 dark:bg-emerald-500/20">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <img 
+                                                src={selectedWorker.avatar} 
+                                                alt={selectedWorker.name} 
+                                                className="w-14 h-14 rounded-full border-2 border-emerald-500 object-cover" 
+                                            />
+                                            <div>
+                                                <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100">{selectedWorker.name}</h3>
+                                                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
+                                                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                                                    <span>{selectedWorker.rating}</span>
+                                                    <span>•</span>
+                                                    <span>{selectedWorker.distance}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Body */}
+                                <div className="p-6 space-y-6">
+                                    <div>
+                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-500 dark:text-neutral-400 mb-3">
+                                            Negotiate Price
+                                        </label>
+                                        
+                                        {/* Current Price Display */}
+                                        <div className="flex items-center justify-between p-4 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 mb-4">
+                                            <span className="text-sm text-neutral-600 dark:text-neutral-400">Original Price</span>
+                                            <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">₹{proposedPrice}</span>
+                                        </div>
+
+                                        {/* Price Input with Increment/Decrement */}
                                         <div className="space-y-3">
-                                            <div className="text-sm text-emerald-100/80">Matching you with the closest verified worker. Hang tight.</div>
-                                            <div className="grid grid-cols-3 gap-3">
-                                                {[1, 2, 3].map((i) => (
-                                                    <div key={i} className="h-20 rounded-xl bg-white/5 border border-white/5 animate-pulse" />
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Your Offer</span>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => incrementPrice(-50)}
+                                                        className="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors"
+                                                    >
+                                                        <Minus size={14} />
+                                                    </button>
+                                                    
+                                                    <div className="relative flex items-center gap-1 px-4 py-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20">
+                                                        <IndianRupee size={16} className="text-emerald-600 dark:text-emerald-400" />
+                                                        <input
+                                                            type="number"
+                                                            value={negotiationPrice}
+                                                            onChange={(e) => setNegotiationPrice(Number(e.target.value))}
+                                                            className="w-20 bg-transparent text-xl font-black text-center focus:outline-none text-emerald-600 dark:text-emerald-400"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <button
+                                                        onClick={() => incrementPrice(50)}
+                                                        className="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors"
+                                                    >
+                                                        <Plus size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Quick Amount Buttons */}
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Quick:</span>
+                                                {[600, 700, 800, 900, 1000].map((amount) => (
+                                                    <button
+                                                        key={amount}
+                                                        onClick={() => setNegotiationPrice(amount)}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                                            negotiationPrice === amount
+                                                                ? 'bg-emerald-500 text-white'
+                                                                : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                                                        }`}
+                                                    >
+                                                        ₹{amount}
+                                                    </button>
                                                 ))}
                                             </div>
+
+                                            {/* Price Range Slider */}
+                                            <input
+                                                type="range"
+                                                min={500}
+                                                max={1500}
+                                                step={50}
+                                                value={negotiationPrice}
+                                                onChange={(e) => setNegotiationPrice(Number(e.target.value))}
+                                                className="w-full h-2 rounded-full appearance-none cursor-pointer accent-emerald-500"
+                                                style={{
+                                                    background: `linear-gradient(to right, #10b981 0%, #10b981 ${((negotiationPrice - 500) / 1000) * 100}%, rgb(212 212 212 / 0.3) ${((negotiationPrice - 500) / 1000) * 100}%, rgb(212 212 212 / 0.3) 100%)`
+                                                }}
+                                            />
                                         </div>
-                                    )}
 
-                                    {status === 'negotiating' && selectedWorker && (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3">
-                                                <img src={selectedWorker.avatar} alt={selectedWorker.name} className="w-12 h-12 rounded-full object-cover border border-emerald-700/50" />
-                                                <div className="flex-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="text-base font-semibold text-white">{selectedWorker.name}</div>
-                                                        <span className="text-xs px-2 py-1 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700/70">{selectedWorker.distance} away</span>
-                                                    </div>
-                                                    <div className="text-sm text-emerald-100/80">⭐ {selectedWorker.rating} rating</div>
-                                                </div>
-                                                <a href={`tel:${selectedWorker.phone}`} className="p-2 rounded-full border border-white/10 hover:bg-white/5 text-white" aria-label="Call worker">
-                                                    <Phone size={16} />
-                                                </a>
-                                            </div>
-
-                                            <div className="p-3 rounded-xl border border-white/10 bg-white/5">
-                                                <div className="flex items-center justify-between text-sm text-emerald-100/90">
-                                                    <div className="flex items-center gap-2"><IndianRupee size={16} /> Proposed price</div>
-                                                    <span className="font-semibold text-white">₹{proposedPrice}</span>
-                                                </div>
-                                                <div className="mt-3">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <label className="text-xs text-emerald-100/70">Counter offer</label>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-emerald-100/70 text-xs">₹</span>
-                                                            <input
-                                                                type="number"
-                                                                value={negotiationPrice}
-                                                                onChange={(e) => setNegotiationPrice(Number(e.target.value))}
-                                                                className="w-16 px-2 py-0.5 rounded-md border border-emerald-700/50 bg-white/5 text-white text-xs font-semibold text-right focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <input
-                                                        type="range"
-                                                        min={proposedPrice - 200}
-                                                        max={proposedPrice + 400}
-                                                        step={50}
-                                                        value={negotiationPrice}
-                                                        onChange={(e) => setNegotiationPrice(Number(e.target.value))}
-                                                        className="w-full accent-emerald-400"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <button
-                                                    onClick={() => setStatus('confirmed')}
-                                                    className="h-11 rounded-xl bg-emerald-500 text-white font-semibold shadow hover:bg-emerald-600 transition"
-                                                >
-                                                    Accept & Confirm
-                                                </button>
-                                                <button
-                                                    onClick={() => setStatus('searching')}
-                                                    className="h-11 rounded-xl border border-white/10 bg-white/5 text-white font-semibold hover:bg-white/10 transition"
-                                                >
-                                                    Find Another
-                                                </button>
-                                            </div>
+                                        {/* Action Buttons */}
+                                        <div className="grid grid-cols-2 gap-3 pt-2">
+                                            <button
+                                                onClick={() => setStatus('searching')}
+                                                className="py-3 rounded-xl font-semibold text-sm bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                                            >
+                                                Find Another
+                                            </button>
+                                            <button
+                                                onClick={() => setStatus('confirmed')}
+                                                className="py-3 rounded-xl font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
+                                            >
+                                                Accept & Confirm
+                                            </button>
                                         </div>
-                                    )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
 
-                                    {status === 'confirmed' && selectedWorker && (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-emerald-900 border border-emerald-700 flex items-center justify-center text-emerald-200">
-                                                    <Clock size={18} />
-                                                </div>
-                                                <div>
-                                                    <div className="text-sm text-emerald-100/80">Worker confirmed</div>
-                                                    <div className="text-base font-semibold text-white">{selectedWorker.name} starts in 15 mins</div>
-                                                </div>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white flex items-center justify-between">
-                                                <div>
-                                                    <div className="text-xs uppercase tracking-[0.08em]">Live tracking</div>
-                                                    <div className="text-sm font-semibold">Worker is on the way</div>
-                                                </div>
-                                                <Navigation size={20} />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <button
-                                                    onClick={() => setStatus('in-progress')}
-                                                    className="h-11 rounded-xl bg-white text-emerald-900 font-semibold hover:bg-emerald-50 transition"
-                                                >
-                                                    Start Job
-                                                </button>
-                                                <button
-                                                    onClick={() => setStatus('negotiating')}
-                                                    className="h-11 rounded-xl border border-white/10 bg-white/5 text-white font-semibold hover:bg-white/10 transition"
-                                                >
-                                                    Modify Details
-                                                </button>
-                                            </div>
+            {/* Confirmed/In-Progress Bottom Panel */}
+            <AnimatePresence>
+                {(status === 'confirmed' || status === 'in-progress') && selectedWorker && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 100 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 100 }}
+                        className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-30"
+                    >
+                        <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+                            <div className="p-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                        {status === 'confirmed' ? <Clock size={20} /> : <Navigation size={20} />}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-neutral-900 dark:text-white">
+                                            {status === 'confirmed' ? 'Worker Confirmed' : 'Job In Progress'}
+                                        </h3>
+                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                            {status === 'confirmed' ? 'Arriving in 15 mins' : 'Live tracking enabled'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <img src={selectedWorker.avatar} alt={selectedWorker.name} className="w-12 h-12 rounded-full object-cover" />
+                                    <div className="flex-1">
+                                        <h4 className="font-medium text-neutral-900 dark:text-white">{selectedWorker.name}</h4>
+                                        <div className="flex items-center gap-2 text-sm text-neutral-500">
+                                            <Star size={12} className="fill-amber-400 text-amber-400" />
+                                            <span>{selectedWorker.rating}</span>
                                         </div>
+                                    </div>
+                                    <a href={`tel:${selectedWorker.phone}`} className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 transition-colors">
+                                        <Phone size={20} />
+                                    </a>
+                                </div>
+                                <div className="flex gap-2">
+                                    {status === 'confirmed' ? (
+                                        <button 
+                                            onClick={() => setStatus('in-progress')}
+                                            className="flex-1 py-2.5 rounded-lg bg-emerald-500 text-white font-medium text-sm hover:bg-emerald-600 transition-colors"
+                                        >
+                                            Start Job
+                                        </button>
+                                    ) : (
+                                        <button className="flex-1 py-2.5 rounded-lg bg-emerald-500 text-white font-medium text-sm hover:bg-emerald-600 transition-colors">
+                                            Mark Complete
+                                        </button>
                                     )}
-
-                                    {status === 'in-progress' && selectedWorker && (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-blue-900/60 border border-blue-700 flex items-center justify-center text-blue-100">
-                                                    <MapPin size={18} />
-                                                </div>
-                                                <div>
-                                                    <div className="text-sm text-emerald-100/80">Work started</div>
-                                                    <div className="text-base font-semibold text-white">Track progress and pay on completion</div>
-                                                </div>
-                                            </div>
-                                            <div className="p-3 rounded-xl border border-white/10 bg-white/5">
-                                                <div className="flex items-center justify-between text-sm text-emerald-100/90">
-                                                    <span>Agreed pay</span>
-                                                    <span className="font-semibold text-white">₹{negotiationPrice}</span>
-                                                </div>
-                                                <div className="mt-2 text-xs text-emerald-100/70">Payment releases after you mark the job complete.</div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <button className="h-11 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition">Mark Complete</button>
-                                                <button className="h-11 rounded-xl border border-white/10 bg-white/5 text-white font-semibold hover:bg-white/10 transition">Help</button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            </AnimatePresence>
-                        </>
-                    )}
-                </motion.div>
-            </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
