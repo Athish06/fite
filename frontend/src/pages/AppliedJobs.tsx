@@ -1,80 +1,584 @@
-import React from 'react';
-import { Briefcase, Zap, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
-import MapWorker from './MapWorker'; // Using MapWorker as the "Daily Wages" seeker view
-import MyApplications from './MyApplications'; // Using MyApplications as "Full Time" seeker view
+import React, { useState } from 'react';
 import { useMode } from '../context/ModeContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LayoutGrid, List, MapPin, Clock, IndianRupee, Star, Calendar, CheckCircle, XCircle, Clock3, ChevronDown } from 'lucide-react';
+import TextType from '../components/ui/TextType';
+
+type JobStatus = 'completed' | 'selected' | 'rejected' | 'waiting';
+type DateFilter = 'today' | 'yesterday' | 'this-week' | 'this-month' | 'all';
+
+interface DailyJob {
+    id: number;
+    title: string;
+    location: string;
+    pay: string;
+    time: string;
+    status: 'completed';
+    completedAt: string;
+    rating: number;
+    employer: string;
+    duration: string;
+}
+
+interface LongTermJob {
+    id: number;
+    title: string;
+    company: string;
+    location: string;
+    salary: string;
+    type: string;
+    status: JobStatus;
+    appliedAt: string;
+    responseAt?: string;
+}
 
 const AppliedJobs: React.FC = () => {
     const { mode } = useMode();
+    const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+    const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
     const isDaily = mode === 'daily';
 
-    return (
-        <div className="flex flex-col gap-6 min-h-screen">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 ${isDaily ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}
-                    >
-                        <Sparkles size={12} />
-                        {isDaily ? 'Active Gigs' : 'Career Applications'}
-                    </motion.div>
-                    <motion.h1 
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-4xl md:text-5xl font-black text-white tracking-tight mb-2"
-                    >
-                        Applied Jobs
-                    </motion.h1>
-                    <motion.p 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-white/50 text-lg"
-                    >
-                        Track your applications and active gigs
-                    </motion.p>
-                </div>
+    // Mock data for daily wage completed jobs
+    const dailyJobs: DailyJob[] = [
+        {
+            id: 1,
+            title: "Plumbing Repair",
+            location: "Indiranagar, Bangalore",
+            pay: "₹850",
+            time: "9 AM - 5 PM",
+            status: "completed",
+            completedAt: "Today, 5:30 PM",
+            rating: 4.8,
+            employer: "Rahul Sharma",
+            duration: "8 hours"
+        },
+        {
+            id: 2,
+            title: "Electrical Wiring",
+            location: "Koramangala, Bangalore",
+            pay: "₹1,200",
+            time: "10 AM - 6 PM",
+            status: "completed",
+            completedAt: "Today, 6:00 PM",
+            rating: 5.0,
+            employer: "Priya Patel",
+            duration: "8 hours"
+        },
+        {
+            id: 3,
+            title: "House Painting",
+            location: "HSR Layout, Bangalore",
+            pay: "₹900",
+            time: "8 AM - 4 PM",
+            status: "completed",
+            completedAt: "Yesterday, 4:00 PM",
+            rating: 4.5,
+            employer: "Vikram Kumar",
+            duration: "8 hours"
+        },
+        {
+            id: 4,
+            title: "AC Servicing",
+            location: "Whitefield, Bangalore",
+            pay: "₹700",
+            time: "11 AM - 3 PM",
+            status: "completed",
+            completedAt: "Yesterday, 3:30 PM",
+            rating: 4.9,
+            employer: "Meera Singh",
+            duration: "4 hours"
+        }
+    ];
 
-                {/* Mode Indicator */}
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`px-5 py-3 rounded-2xl border flex items-center gap-3 text-sm font-bold backdrop-blur-xl ${
-                        isDaily
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                            : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-                    }`}
-                >
-                    {isDaily ? <Zap size={18} /> : <Briefcase size={18} />}
-                    <span>{isDaily ? 'Daily Wages Mode' : 'Long Term Mode'}</span>
-                </motion.div>
+    // Mock data for long-term job applications
+    const longTermJobs: LongTermJob[] = [
+        {
+            id: 1,
+            title: "Frontend Developer",
+            company: "TechCorp Solutions",
+            location: "Bangalore",
+            salary: "₹12 LPA",
+            type: "Full-time",
+            status: "selected",
+            appliedAt: "Dec 15, 2025",
+            responseAt: "Dec 17, 2025"
+        },
+        {
+            id: 2,
+            title: "UI/UX Designer",
+            company: "DesignHub India",
+            location: "Remote",
+            salary: "₹10 LPA",
+            type: "Full-time",
+            status: "waiting",
+            appliedAt: "Dec 16, 2025"
+        },
+        {
+            id: 3,
+            title: "React Developer Intern",
+            company: "StartupXYZ",
+            location: "Hyderabad",
+            salary: "₹25,000/month",
+            type: "Internship",
+            status: "rejected",
+            appliedAt: "Dec 10, 2025",
+            responseAt: "Dec 14, 2025"
+        },
+        {
+            id: 4,
+            title: "Full Stack Developer",
+            company: "GlobalTech",
+            location: "Bangalore",
+            salary: "₹15 LPA",
+            type: "Full-time",
+            status: "waiting",
+            appliedAt: "Dec 18, 2025"
+        }
+    ];
+
+    const dateFilterOptions = [
+        { value: 'today', label: 'Today' },
+        { value: 'yesterday', label: 'Yesterday' },
+        { value: 'this-week', label: 'This Week' },
+        { value: 'this-month', label: 'This Month' },
+        { value: 'all', label: 'All Time' }
+    ];
+
+    const getStatusBadge = (status: JobStatus) => {
+        switch (status) {
+            case 'completed':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
+                        <CheckCircle size={12} /> Completed
+                    </span>
+                );
+            case 'selected':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
+                        <CheckCircle size={12} /> Selected
+                    </span>
+                );
+            case 'rejected':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-100 text-red-700 text-xs font-medium">
+                        <XCircle size={12} /> Rejected
+                    </span>
+                );
+            case 'waiting':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-xs font-medium">
+                        <Clock3 size={12} /> Waiting
+                    </span>
+                );
+        }
+    };
+
+    // Calculate total earnings for daily wage
+    const totalEarnings = dailyJobs.reduce((sum, job) => {
+        const amount = parseInt(job.pay.replace('₹', '').replace(',', ''));
+        return sum + amount;
+    }, 0);
+
+    const avgRating = (dailyJobs.reduce((sum, job) => sum + job.rating, 0) / dailyJobs.length).toFixed(1);
+
+    return (
+        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
+            {/* Background Pattern - Watercolor Paper Texture */}
+            <div 
+                className="fixed inset-0 pointer-events-none overflow-hidden z-0" 
+                style={{ 
+                    left: 0, 
+                    right: 0,
+                    backgroundColor: isDaily ? '#F5F9F7' : '#FAF8F5'
+                }}
+            >
+                {/* Grainy Paper Texture */}
+                <div 
+                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
+                    style={{ filter: 'contrast(110%) brightness(100%)' }}
+                />
+                
+                {/* Organic Watercolor Gradients */}
+                {isDaily ? (
+                    <>
+                        <div 
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
+                            style={{ 
+                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
+                                filter: 'blur(60px)'
+                            }}
+                        />
+                        <div 
+                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
+                            style={{ 
+                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
+                                filter: 'blur(80px)'
+                            }}
+                        />
+                        <div 
+                            className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
+                            style={{ 
+                                background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
+                                filter: 'blur(70px)'
+                            }}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <div 
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
+                            style={{ 
+                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
+                                filter: 'blur(60px)'
+                            }}
+                        />
+                        <div 
+                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
+                            style={{ 
+                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
+                                filter: 'blur(80px)'
+                            }}
+                        />
+                        <div 
+                            className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
+                            style={{ 
+                                background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
+                                filter: 'blur(70px)'
+                            }}
+                        />
+                    </>
+                )}
             </div>
 
-            {/* Content Area */}
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className={`flex-1 w-full min-h-[600px] relative rounded-3xl overflow-hidden border backdrop-blur-sm ${
-                    isDaily 
-                        ? 'border-emerald-500/10 bg-emerald-900/5' 
-                        : 'border-amber-500/10 bg-amber-900/5'
-                }`}
-            >
-                {isDaily ? (
-                    <div className="h-full w-full">
-                        <MapWorker />
+            {/* Header Toolbar */}
+            <div className="relative z-10 flex items-center justify-between mb-8">
+                {/* Left: Title with Typewriter */}
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-neutral-800">
+                        <TextType
+                            text={isDaily ? "Job History" : "Applications"}
+                            typingSpeed={80}
+                            loop={false}
+                            showCursor={false}
+                        />
+                    </h1>
+                    <p className="text-sm text-neutral-600 mt-1">
+                        {isDaily ? "Your completed jobs and earnings" : "Track your job applications"}
+                    </p>
+                </div>
+
+                {/* Right: Control Bar */}
+                <div className="flex items-center gap-3">
+                    {/* Date Filter Dropdown */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 border border-neutral-300/80 backdrop-blur-sm text-sm font-medium text-neutral-700 hover:bg-white/80 transition-colors"
+                        >
+                            <Calendar size={16} />
+                            {dateFilterOptions.find(o => o.value === dateFilter)?.label}
+                            <ChevronDown size={14} className={`transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        <AnimatePresence>
+                            {isFilterOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute top-full mt-2 right-0 w-40 bg-white rounded-lg border border-neutral-200 shadow-lg overflow-hidden z-20"
+                                >
+                                    {dateFilterOptions.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => {
+                                                setDateFilter(option.value as DateFilter);
+                                                setIsFilterOpen(false);
+                                            }}
+                                            className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                                                dateFilter === option.value
+                                                    ? 'bg-neutral-100 text-neutral-900 font-medium'
+                                                    : 'text-neutral-600 hover:bg-neutral-50'
+                                            }`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
+
+                    {/* View Switcher - Segmented Control */}
+                    <div className="relative flex items-center p-1 rounded-lg bg-white/60 border border-neutral-300/80 backdrop-blur-sm">
+                        <motion.div
+                            layoutId="appliedViewToggle"
+                            className="absolute h-8 rounded-md bg-neutral-900 shadow-sm"
+                            initial={false}
+                            animate={{
+                                x: viewMode === 'card' ? 4 : 44,
+                                width: 36
+                            }}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                        <button
+                            onClick={() => setViewMode('card')}
+                            className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${
+                                viewMode === 'card' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                            }`}
+                        >
+                            <LayoutGrid size={16} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${
+                                viewMode === 'list' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                            }`}
+                        >
+                            <List size={16} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stats Summary for Daily Wage */}
+            {isDaily && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="relative z-10 grid grid-cols-3 gap-4 mb-6"
+                >
+                    <div 
+                        className="p-4 rounded-xl border border-neutral-300/80"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                    >
+                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Total Earned</p>
+                        <p className="text-2xl font-bold text-neutral-800">₹{totalEarnings.toLocaleString()}</p>
+                    </div>
+                    <div 
+                        className="p-4 rounded-xl border border-neutral-300/80"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                    >
+                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Jobs Completed</p>
+                        <p className="text-2xl font-bold text-neutral-800">{dailyJobs.length}</p>
+                    </div>
+                    <div 
+                        className="p-4 rounded-xl border border-neutral-300/80"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                    >
+                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Avg Rating</p>
+                        <p className="text-2xl font-bold text-neutral-800 flex items-center gap-1">
+                            <Star size={18} className="fill-amber-400 text-amber-400" />
+                            {avgRating}
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Jobs Grid/List */}
+            <AnimatePresence mode="wait">
+                {viewMode === 'card' ? (
+                    <motion.div
+                        key="cards"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+                    >
+                        {isDaily ? (
+                            // Daily Wage Completed Jobs
+                            dailyJobs.map((job, index) => (
+                                <motion.div
+                                    key={job.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="group relative cursor-pointer p-5 rounded-xl border border-neutral-300/80 hover:border-neutral-400 transition-all duration-300"
+                                    style={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+                                    }}
+                                >
+                                    {/* Accent Line */}
+                                    <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-800" />
+
+                                    {/* Header */}
+                                    <div className="flex items-start justify-between mb-3">
+                                        <h3 className="text-lg font-semibold text-neutral-800 pr-3">{job.title}</h3>
+                                        {getStatusBadge('completed')}
+                                    </div>
+
+                                    {/* Employer */}
+                                    <p className="text-sm text-neutral-600 mb-3">by {job.employer}</p>
+
+                                    {/* Metrics */}
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                            <MapPin size={14} className="text-neutral-500" />
+                                            <span>{job.location}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 text-sm text-neutral-700">
+                                                <IndianRupee size={14} className="text-neutral-500" />
+                                                <span className="font-semibold">{job.pay}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                <Clock size={14} className="text-neutral-500" />
+                                                <span>{job.duration}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between">
+                                        <div className="flex items-center gap-1 text-sm">
+                                            <Star size={14} className="fill-amber-400 text-amber-400" />
+                                            <span className="font-medium text-neutral-700">{job.rating}</span>
+                                        </div>
+                                        <span className="text-xs text-neutral-500">{job.completedAt}</span>
+                                    </div>
+                                </motion.div>
+                            ))
+                        ) : (
+                            // Long Term Job Applications
+                            longTermJobs.map((job, index) => (
+                                <motion.div
+                                    key={job.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="group relative cursor-pointer p-5 rounded-xl border border-neutral-300/80 hover:border-neutral-400 transition-all duration-300"
+                                    style={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+                                    }}
+                                >
+                                    {/* Accent Line */}
+                                    <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${
+                                        job.status === 'selected' ? 'bg-emerald-500' :
+                                        job.status === 'rejected' ? 'bg-red-500' :
+                                        'bg-amber-500'
+                                    }`} />
+
+                                    {/* Header */}
+                                    <div className="flex items-start justify-between mb-2">
+                                        <h3 className="text-lg font-semibold text-neutral-800 pr-3">{job.title}</h3>
+                                        {getStatusBadge(job.status)}
+                                    </div>
+
+                                    {/* Company */}
+                                    <p className="text-sm font-medium text-neutral-700 mb-3">{job.company}</p>
+
+                                    {/* Metrics */}
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                            <MapPin size={14} className="text-neutral-500" />
+                                            <span>{job.location}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 text-sm text-neutral-700">
+                                                <IndianRupee size={14} className="text-neutral-500" />
+                                                <span className="font-medium">{job.salary}</span>
+                                            </div>
+                                            <span className="text-xs px-2 py-0.5 rounded-md border border-neutral-300 text-neutral-600">
+                                                {job.type}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between">
+                                        <span className="text-xs text-neutral-500">Applied: {job.appliedAt}</span>
+                                        {job.responseAt && (
+                                            <span className="text-xs text-neutral-500">Response: {job.responseAt}</span>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))
+                        )}
+                    </motion.div>
                 ) : (
-                    <div className="h-full w-full overflow-y-auto p-6">
-                        <MyApplications />
-                    </div>
+                    <motion.div
+                        key="list"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="relative z-10 space-y-2"
+                    >
+                        {/* Table Header */}
+                        <div className="grid grid-cols-12 gap-4 px-5 py-3 text-[11px] uppercase tracking-wider font-semibold text-neutral-500">
+                            <div className="col-span-3">Job Title</div>
+                            <div className="col-span-3">{isDaily ? 'Employer' : 'Company'}</div>
+                            <div className="col-span-2">{isDaily ? 'Earnings' : 'Salary'}</div>
+                            <div className="col-span-2">Status</div>
+                            <div className="col-span-2 text-right">{isDaily ? 'Rating' : 'Applied'}</div>
+                        </div>
+
+                        {isDaily ? (
+                            dailyJobs.map((job, index) => (
+                                <motion.div
+                                    key={job.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-lg border border-neutral-300/80 hover:border-neutral-400 transition-all duration-200"
+                                    style={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
+                                    }}
+                                >
+                                    <div className="col-span-3 flex items-center gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-neutral-800" />
+                                        <div>
+                                            <div className="text-sm font-medium text-neutral-800">{job.title}</div>
+                                            <span className="text-xs text-neutral-500">{job.location}</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-3 text-sm text-neutral-600">{job.employer}</div>
+                                    <div className="col-span-2 text-sm font-semibold text-neutral-700">{job.pay}</div>
+                                    <div className="col-span-2">{getStatusBadge('completed')}</div>
+                                    <div className="col-span-2 flex items-center justify-end gap-1">
+                                        <Star size={14} className="fill-amber-400 text-amber-400" />
+                                        <span className="text-sm font-medium text-neutral-700">{job.rating}</span>
+                                    </div>
+                                </motion.div>
+                            ))
+                        ) : (
+                            longTermJobs.map((job, index) => (
+                                <motion.div
+                                    key={job.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-lg border border-neutral-300/80 hover:border-neutral-400 transition-all duration-200"
+                                    style={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
+                                    }}
+                                >
+                                    <div className="col-span-3 flex items-center gap-3">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${
+                                            job.status === 'selected' ? 'bg-emerald-500' :
+                                            job.status === 'rejected' ? 'bg-red-500' :
+                                            'bg-amber-500'
+                                        }`} />
+                                        <div>
+                                            <div className="text-sm font-medium text-neutral-800">{job.title}</div>
+                                            <span className="text-xs text-neutral-500">{job.location}</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-3 text-sm text-neutral-600">{job.company}</div>
+                                    <div className="col-span-2 text-sm font-medium text-neutral-700">{job.salary}</div>
+                                    <div className="col-span-2">{getStatusBadge(job.status)}</div>
+                                    <div className="col-span-2 text-xs text-neutral-500 text-right">{job.appliedAt}</div>
+                                </motion.div>
+                            ))
+                        )}
+                    </motion.div>
                 )}
-            </motion.div>
+            </AnimatePresence>
         </div>
     );
 };

@@ -17,6 +17,7 @@ import JobDetail from './pages/JobDetail';
 import PostDailyJob from './pages/PostDailyJob';
 import PostLongTermJob from './pages/PostLongTermJob';
 import Applicants from './pages/Applicants';
+import ExploreJobs from './pages/ExploreJobs';
 
 import { ModeProvider } from './context/ModeContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
               <Route path="post-daily-job" element={<PostDailyJob />} />
               <Route path="post-long-term-job" element={<PostLongTermJob />} />
               <Route path="applied-jobs" element={<AppliedJobs />} />
+              <Route path="explore-jobs" element={<ExploreJobs />} />
               <Route path="chat-inbox" element={<ChatInbox />} />
               <Route path="chat" element={<ChatInbox />} />
               <Route path="settings" element={<UserSettings />} />

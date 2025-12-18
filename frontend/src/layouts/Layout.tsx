@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Home, Briefcase, FileText, MessageCircle,
-    Menu, X, ChevronRight, Sun, Moon
+    Menu, X, ChevronRight, Sun, Moon, Search
 } from "lucide-react";
 import { useMode } from "../context/ModeContext";
 import { useTheme } from "../context/ThemeContext";
@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
     { icon: <Home size={22} />, label: "Home", href: "/" },
     { icon: <Briefcase size={22} />, label: "Posted Jobs", href: "/posted-jobs" },
     { icon: <FileText size={22} />, label: "Applied Jobs", href: "/applied-jobs" },
+    { icon: <Search size={22} />, label: "Explore Jobs", href: "/explore-jobs" },
     { icon: <MessageCircle size={22} />, label: "Messages", href: "/chat-inbox" },
 ];
 
