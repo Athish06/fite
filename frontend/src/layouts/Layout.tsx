@@ -1,11 +1,12 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    Home, Briefcase, FileText, MessageCircle, 
-    Menu, X, ChevronRight
+import {
+    Home, Briefcase, FileText, MessageCircle,
+    Menu, X, ChevronRight, Sun, Moon
 } from "lucide-react";
 import { useMode } from "../context/ModeContext";
+import { useTheme } from "../context/ThemeContext";
 import GlobalToggle from "../components/GlobalToggle";
 
 interface NavItem {
@@ -26,9 +27,10 @@ const Layout: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { mode } = useMode();
+    const { isDark, toggleTheme } = useTheme();
 
-    // Don't show mode toggle on job-responses pages
-    const hideToggle = location.pathname.includes("/job-responses") || location.pathname.includes("/job-detail");
+    // Don't show mode toggle on job-responses, job-detail, and applicants pages
+    const hideToggle = location.pathname.includes("/job-responses") || location.pathname.includes("/job-detail") || location.pathname.includes("/applicants");
 
     // Full screen pages - no sidebar
     const isFullScreen = location.pathname.includes("/job-responses");
@@ -42,25 +44,27 @@ const Layout: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#09090b] relative overflow-hidden">
+        <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${isDark ? 'bg-[#09090b]' : 'bg-neutral-50'
+            }`}>
             {/* Subtle gradient orbs */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className={`absolute top-[-40%] right-[-20%] w-[60%] h-[60%] rounded-full blur-[150px] ${
-                    mode === 'daily' ? 'bg-emerald-500/5' : 'bg-amber-500/5'
-                }`} />
-                <div className={`absolute bottom-[-30%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] ${
-                    mode === 'daily' ? 'bg-emerald-600/3' : 'bg-amber-600/3'
-                }`} />
+                <div className={`absolute top-[-40%] right-[-20%] w-[60%] h-[60%] rounded-full blur-[150px] ${mode === 'daily' ? 'bg-emerald-500/5' : 'bg-amber-500/5'
+                    }`} />
+                <div className={`absolute bottom-[-30%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] ${mode === 'daily' ? 'bg-emerald-600/3' : 'bg-amber-600/3'
+                    }`} />
             </div>
 
             {/* Navigation Toggle Button */}
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`fixed top-6 left-6 z-50 p-2.5 rounded-lg border transition-all duration-200 ${
-                    isOpen 
-                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100' 
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-300 hover:border-zinc-700'
-                }`}
+                className={`fixed top-6 left-6 z-50 p-2.5 rounded-lg border transition-all duration-200 ${isOpen
+                    ? isDark
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                        : 'bg-neutral-200 border-neutral-300 text-neutral-800'
+                    : isDark
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-300 hover:border-zinc-700'
+                        : 'bg-white border-neutral-200 text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 shadow-sm'
+                    }`}
                 whileTap={{ scale: 0.95 }}
             >
                 <AnimatePresence mode="wait">
@@ -107,21 +111,34 @@ const Layout: React.FC = () => {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.98 }}
                             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-                            className="fixed top-[72px] left-6 z-50 w-64 rounded-xl border border-zinc-800 bg-[#121212] shadow-2xl overflow-hidden"
+                            className={`fixed top-[72px] left-6 z-50 w-64 rounded-xl border shadow-2xl overflow-hidden ${isDark
+                                ? 'border-zinc-800 bg-[#121212]'
+                                : 'border-neutral-200 bg-white'
+                                }`}
                         >
                             {/* Logo/Brand */}
-                            <div className="px-5 py-4 border-b border-zinc-800">
+                            <div className={`px-5 py-4 border-b flex items-center justify-between ${isDark ? 'border-zinc-800' : 'border-neutral-100'
+                                }`}>
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold ${
-                                        mode === 'daily' ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
-                                    }`}>
+                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold ${mode === 'daily' ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
+                                        }`}>
                                         F
                                     </div>
                                     <div>
-                                        <div className="text-zinc-100 font-semibold text-sm">FITE</div>
-                                        <div className="text-zinc-600 text-[11px]">Find • Work • Grow</div>
+                                        <div className={`font-semibold text-sm ${isDark ? 'text-zinc-100' : 'text-neutral-900'}`}>FITE</div>
+                                        <div className={`text-[11px] ${isDark ? 'text-zinc-600' : 'text-neutral-500'}`}>Find • Work • Grow</div>
                                     </div>
                                 </div>
+                                {/* Theme Toggle */}
+                                <button
+                                    onClick={toggleTheme}
+                                    className={`p-2 rounded-lg transition-colors ${isDark
+                                        ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                                        : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700'
+                                        }`}
+                                >
+                                    {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                                </button>
                             </div>
 
                             {/* Nav Items */}
@@ -138,17 +155,19 @@ const Layout: React.FC = () => {
                                                 setIsOpen(false);
                                                 navigate(item.href);
                                             }}
-                                            className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative ${
-                                                active
+                                            className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative ${active
+                                                ? isDark
                                                     ? 'bg-zinc-800 text-zinc-100'
-                                                    : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300'
-                                            }`}
+                                                    : 'bg-neutral-100 text-neutral-900'
+                                                : isDark
+                                                    ? 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300'
+                                                    : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700'
+                                                }`}
                                         >
                                             {/* Active indicator */}
                                             {active && (
-                                                <div className={`absolute left-0 top-2 bottom-2 w-0.5 rounded-full ${
-                                                    mode === 'daily' ? 'bg-emerald-500' : 'bg-amber-500'
-                                                }`} />
+                                                <div className={`absolute left-0 top-2 bottom-2 w-0.5 rounded-full ${mode === 'daily' ? 'bg-emerald-500' : 'bg-amber-500'
+                                                    }`} />
                                             )}
                                             <span className="ml-1">{item.icon}</span>
                                             <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
@@ -158,23 +177,25 @@ const Layout: React.FC = () => {
                                 })}
                             </div>
 
-                            {/* Profile */}
-                            <div className="p-2 border-t border-zinc-800">
+                            <div className={`p-2 border-t ${isDark ? 'border-zinc-800' : 'border-neutral-100'}`}>
                                 <button
                                     onClick={() => {
                                         setIsOpen(false);
                                         navigate('/profile');
                                     }}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-800/50 transition-colors"
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isDark
+                                        ? 'hover:bg-zinc-800/50'
+                                        : 'hover:bg-neutral-50'
+                                        }`}
                                 >
                                     <img
                                         src="https://i.pravatar.cc/150?img=3"
-                                        className="h-8 w-8 rounded-full object-cover ring-1 ring-zinc-700"
+                                        className={`h-8 w-8 rounded-full object-cover ring-1 ${isDark ? 'ring-zinc-700' : 'ring-neutral-200'}`}
                                         alt="Avatar"
                                     />
                                     <div className="text-left flex-1">
-                                        <div className="text-zinc-300 font-medium text-sm">Athish</div>
-                                        <div className="text-zinc-600 text-[11px]">View Profile</div>
+                                        <div className={`font-medium text-sm ${isDark ? 'text-zinc-300' : 'text-neutral-800'}`}>Athish</div>
+                                        <div className={`text-[11px] ${isDark ? 'text-zinc-600' : 'text-neutral-500'}`}>View Profile</div>
                                     </div>
                                 </button>
                             </div>

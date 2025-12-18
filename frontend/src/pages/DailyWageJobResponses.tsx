@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, MapPin, IndianRupee, Clock, Phone, Navigation, Plus, Minus, X, Star } from 'lucide-react';
+import { ChevronLeft, IndianRupee, Clock, Phone, Navigation, Plus, Minus, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JobMap from '../components/JobMap';
 
@@ -24,7 +24,8 @@ const DailyWageJobResponses: React.FC = () => {
     const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
     const [proposedPrice] = useState(800);
     const [negotiationPrice, setNegotiationPrice] = useState(800);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    // Unused variables removed
     const canvasRef = useRef<HTMLDivElement>(null);
 
     const incrementPrice = (amount: number) => {
@@ -63,20 +64,7 @@ const DailyWageJobResponses: React.FC = () => {
         return [{ lat: jobLocation.lat, lng: jobLocation.lng, price: `₹${proposedPrice}`, icon: '⚒', isActive: true, variant: 'job' as const }];
     }, [jobLocation.lat, jobLocation.lng, proposedPrice, selectedWorker, status]);
 
-    const statusLabel = (() => {
-        switch (status) {
-            case 'searching':
-                return 'Finding a nearby worker...';
-            case 'negotiating':
-                return 'Negotiate and confirm';
-            case 'confirmed':
-                return 'Worker confirmed';
-            case 'in-progress':
-                return 'Worker en route';
-            default:
-                return '';
-        }
-    })();
+
 
     return (
         <div ref={canvasRef} className="fixed inset-0 w-screen h-screen bg-slate-50">
@@ -84,7 +72,7 @@ const DailyWageJobResponses: React.FC = () => {
             <div className="absolute inset-0">
                 <JobMap jobs={mapJobs} center={[jobLocation.lat, jobLocation.lng]} zoom={13.5} showControls />
             </div>
-            
+
             {/* Back Button - Updated Style */}
             <div className="fixed top-6 left-6 z-20">
                 <button
@@ -153,10 +141,10 @@ const DailyWageJobResponses: React.FC = () => {
                                 <div className="px-6 py-5 bg-emerald-500/10 dark:bg-emerald-500/20">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-4">
-                                            <img 
-                                                src={selectedWorker.avatar} 
-                                                alt={selectedWorker.name} 
-                                                className="w-14 h-14 rounded-full border-2 border-emerald-500 object-cover" 
+                                            <img
+                                                src={selectedWorker.avatar}
+                                                alt={selectedWorker.name}
+                                                className="w-14 h-14 rounded-full border-2 border-emerald-500 object-cover"
                                             />
                                             <div>
                                                 <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100">{selectedWorker.name}</h3>
@@ -177,7 +165,7 @@ const DailyWageJobResponses: React.FC = () => {
                                         <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-500 dark:text-neutral-400 mb-3">
                                             Negotiate Price
                                         </label>
-                                        
+
                                         {/* Current Price Display */}
                                         <div className="flex items-center justify-between p-4 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 mb-4">
                                             <span className="text-sm text-neutral-600 dark:text-neutral-400">Original Price</span>
@@ -195,7 +183,7 @@ const DailyWageJobResponses: React.FC = () => {
                                                     >
                                                         <Minus size={14} />
                                                     </button>
-                                                    
+
                                                     <div className="relative flex items-center gap-1 px-4 py-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20">
                                                         <IndianRupee size={16} className="text-emerald-600 dark:text-emerald-400" />
                                                         <input
@@ -205,7 +193,7 @@ const DailyWageJobResponses: React.FC = () => {
                                                             className="w-20 bg-transparent text-xl font-black text-center focus:outline-none text-emerald-600 dark:text-emerald-400"
                                                         />
                                                     </div>
-                                                    
+
                                                     <button
                                                         onClick={() => incrementPrice(50)}
                                                         className="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors"
@@ -222,11 +210,10 @@ const DailyWageJobResponses: React.FC = () => {
                                                     <button
                                                         key={amount}
                                                         onClick={() => setNegotiationPrice(amount)}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                            negotiationPrice === amount
-                                                                ? 'bg-emerald-500 text-white'
-                                                                : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-                                                        }`}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${negotiationPrice === amount
+                                                            ? 'bg-emerald-500 text-white'
+                                                            : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                                                            }`}
                                                     >
                                                         ₹{amount}
                                                     </button>
@@ -312,7 +299,7 @@ const DailyWageJobResponses: React.FC = () => {
                                 </div>
                                 <div className="flex gap-2">
                                     {status === 'confirmed' ? (
-                                        <button 
+                                        <button
                                             onClick={() => setStatus('in-progress')}
                                             className="flex-1 py-2.5 rounded-lg bg-emerald-500 text-white font-medium text-sm hover:bg-emerald-600 transition-colors"
                                         >

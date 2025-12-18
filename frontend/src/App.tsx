@@ -19,37 +19,40 @@ import PostLongTermJob from './pages/PostLongTermJob';
 import Applicants from './pages/Applicants';
 
 import { ModeProvider } from './context/ModeContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const App: React.FC = () => {
   return (
-    <ModeProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginSignup />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="home" element={<Home />} />
-            <Route path="posted-jobs" element={<PostedJobs />} />
-            <Route path="job-detail/:mode/:jobId" element={<JobDetail />} />
-            <Route path="applicants/:mode/:jobId" element={<Applicants />} />
-            <Route path="job-responses/:mode/:jobId" element={<JobResponses />} />
-            <Route path="post-daily-job" element={<PostDailyJob />} />
-            <Route path="post-long-term-job" element={<PostLongTermJob />} />
-            <Route path="applied-jobs" element={<AppliedJobs />} />
-            <Route path="chat-inbox" element={<ChatInbox />} />
-            <Route path="chat" element={<ChatInbox />} />
-            <Route path="settings" element={<UserSettings />} />
+    <ThemeProvider>
+      <ModeProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginSignup />} />
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="home" element={<Home />} />
+              <Route path="posted-jobs" element={<PostedJobs />} />
+              <Route path="job-detail/:mode/:jobId" element={<JobDetail />} />
+              <Route path="applicants/:mode/:jobId" element={<Applicants />} />
+              <Route path="job-responses/:mode/:jobId" element={<JobResponses />} />
+              <Route path="post-daily-job" element={<PostDailyJob />} />
+              <Route path="post-long-term-job" element={<PostLongTermJob />} />
+              <Route path="applied-jobs" element={<AppliedJobs />} />
+              <Route path="chat-inbox" element={<ChatInbox />} />
+              <Route path="chat" element={<ChatInbox />} />
+              <Route path="settings" element={<UserSettings />} />
 
-            {/* Legacy routes */}
-            <Route path="map" element={<MapWorker />} />
-            <Route path="profile" element={<UserSettings />} />
-            <Route path="jobs" element={<LongTermJobSeekerBoard />} />
-            <Route path="dashboard" element={<LongTermDashboard />} />
-            <Route path="applications" element={<MyApplications />} />
-          </Route>
-        </Routes>
-      </Router>
-    </ModeProvider>
+              {/* Legacy routes */}
+              <Route path="map" element={<MapWorker />} />
+              <Route path="profile" element={<UserSettings />} />
+              <Route path="jobs" element={<LongTermJobSeekerBoard />} />
+              <Route path="dashboard" element={<LongTermDashboard />} />
+              <Route path="applications" element={<MyApplications />} />
+            </Route>
+          </Routes>
+        </Router>
+      </ModeProvider>
+    </ThemeProvider>
   );
 };
 

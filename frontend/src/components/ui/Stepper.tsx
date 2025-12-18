@@ -1,4 +1,4 @@
-import { useState, Children, useRef, useLayoutEffect } from 'react';
+import React, { useState, Children } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Stepper = ({
@@ -101,16 +101,21 @@ const Stepper = ({
                     {!isCompleted ? (
                         <motion.div
                             key={currentStep}
+                            variants={{
+                                enter: (dir: number) => ({
+                                    x: dir > 0 ? '100%' : '-100%',
+                                    opacity: 0,
+                                }),
+                                center: { x: 0, opacity: 1 },
+                                exit: (dir: number) => ({
+                                    x: dir > 0 ? '-100%' : '100%',
+                                    opacity: 0,
+                                }),
+                            }}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
                             custom={direction}
-                            initial={(dir) => ({
-                                x: dir > 0 ? '100%' : '-100%',
-                                opacity: 0,
-                            })}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={(dir) => ({
-                                x: dir > 0 ? '-100%' : '100%',
-                                opacity: 0,
-                            })}
                             transition={{ duration: 0.3, type: 'spring', bounce: 0, damping: 25, stiffness: 300 }}
                             className="h-full w-full"
                         >

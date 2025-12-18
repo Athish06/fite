@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Phone, Mail, MapPin, Star, Calendar, Briefcase, Download, X } from 'lucide-react';
+import { ChevronLeft, Phone, Mail, MapPin, Star, Calendar, Briefcase, Download, X, FileText, LayoutGrid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TextType from '../components/ui/TextType';
+import { useTheme } from '../context/ThemeContext';
+import { useMode } from '../context/ModeContext';
+import PixelBlast from '../components/PixelBlast';
 
 interface Applicant {
     id: number;
@@ -20,10 +23,13 @@ interface Applicant {
 
 const Applicants: React.FC = () => {
     const { mode } = useParams();
+    const { mode: contextMode } = useMode();
+    const { isDark } = useTheme();
     const navigate = useNavigate();
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
+    const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
-    const isDaily = mode === 'daily';
+    const isDaily = mode === 'daily' || contextMode === 'daily';
 
     // Mock applicants data
     const applicants: Applicant[] = [
@@ -82,13 +88,26 @@ const Applicants: React.FC = () => {
     ];
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Same as PostedJobs */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-gray-100 dark:bg-neutral-900" style={{ left: 0, right: 0 }}>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-25 brightness-100 contrast-150"></div>
-                <div className={`absolute top-[-30%] right-[-20%] w-[80%] h-[80%] rounded-full ${isDaily ? 'bg-green-500/10' : 'bg-yellow-500/10'} blur-[140px]`} />
-                <div className={`absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full ${isDaily ? 'bg-emerald-500/8' : 'bg-orange-500/8'} blur-[120px]`} />
-                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] rounded-full ${isDaily ? 'bg-green-400/5' : 'bg-yellow-400/5'} blur-[160px]`} />
+        <div className={`w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8 transition-colors duration-500 ${isDark ? 'bg-[#09090b]' : 'bg-[#F5F8FA]'}`}>
+            {/* PixelBlast Background - Same as PostedJobs */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <PixelBlast
+                    variant="circle"
+                    pixelSize={5}
+                    color={isDaily ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f59e0b' : '#d97706')}
+                    patternScale={2.5}
+                    patternDensity={isDark ? 0.6 : 0.8}
+                    pixelSizeJitter={0.4}
+                    enableRipples
+                    rippleSpeed={0.3}
+                    rippleThickness={0.1}
+                    rippleIntensityScale={1.2}
+                    liquid={false}
+                    speed={0.2}
+                    edgeFade={0.3}
+                    transparent
+                />
+                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-b from-[#09090b]/70 via-[#09090b]/50 to-[#09090b]/80' : 'bg-gradient-to-b from-[#F5F8FA]/80 via-[#F5F8FA]/60 to-[#F5F8FA]/90'}`} />
             </div>
 
             {/* Header */}
@@ -96,27 +115,56 @@ const Applicants: React.FC = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/posted-jobs')}
-                        className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all shadow-sm"
+                        className={`group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDark
+                            ? 'bg-white text-black hover:bg-neutral-200'
+                            : 'bg-black text-white hover:bg-neutral-800'
+                            }`}
                     >
                         <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
                         <span>Back to Jobs</span>
                     </button>
                 </div>
 
-                <div
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${
-                        isDaily
-                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-600'
-                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-600'
-                    }`}
-                >
-                    {isDaily ? 'Daily Wage' : 'Long Term'}
+                <div className="flex items-center gap-3">
+                    {/* View Toggle */}
+                    <div className={`relative flex items-center p-1.5 rounded-xl overflow-hidden ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`}>
+                        <motion.div
+                            layoutId="applicantViewTogglePill"
+                            className={`absolute h-9 w-10 rounded-lg ${isDark ? 'bg-white' : 'bg-black'}`}
+                            initial={false}
+                            animate={{ x: viewMode === 'card' ? 0 : 44 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                        <button
+                            onClick={() => setViewMode('card')}
+                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'card' ? isDark ? 'text-black' : 'text-white' : isDark ? 'text-neutral-400' : 'text-neutral-600'}`}
+                        >
+                            <LayoutGrid size={18} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? isDark ? 'text-black' : 'text-white' : isDark ? 'text-neutral-400' : 'text-neutral-600'}`}
+                        >
+                            <List size={18} />
+                        </button>
+                    </div>
+
+                    {/* Download All Resumes Button */}
+                    <button
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg ${isDark
+                            ? 'bg-white text-black hover:bg-neutral-200'
+                            : 'bg-black text-white hover:bg-neutral-800'
+                            }`}
+                    >
+                        <FileText size={18} />
+                        Download All Resumes
+                    </button>
                 </div>
             </div>
 
             {/* Title Section */}
             <div className="relative z-10 mb-8">
-                <h1 className="text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200">
+                <h1 className={`text-4xl md:text-5xl font-black tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
                     <TextType
                         text="Applicants"
                         typingSpeed={80}
@@ -124,91 +172,177 @@ const Applicants: React.FC = () => {
                         showCursor={false}
                     />
                 </h1>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                <p className={`text-base mt-3 font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                     {applicants.length} {applicants.length === 1 ? 'applicant' : 'applicants'} received for this position
                 </p>
             </div>
 
-            {/* Applicants Grid */}
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {applicants.map((applicant, index) => (
+            {/* Applicants View */}
+            <AnimatePresence mode="wait">
+                {viewMode === 'card' ? (
                     <motion.div
-                        key={applicant.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => setSelectedApplicant(applicant)}
-                        className="group cursor-pointer p-5 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all duration-300 shadow-sm hover:shadow-md"
+                        key="cards"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-5"
                     >
-                        {/* Header with Avatar and Basic Info */}
-                        <div className="flex items-start gap-4 mb-4">
-                            <img
-                                src={applicant.avatar}
-                                alt={applicant.name}
-                                className="w-16 h-16 rounded-full object-cover border-2 border-neutral-300 dark:border-neutral-600"
-                            />
-                            <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">{applicant.name}</h3>
-                                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                                    <Star size={14} className="fill-amber-400 text-amber-400" />
-                                    <span className="font-medium">{applicant.rating}</span>
-                                    <span className="mx-1">•</span>
-                                    <Briefcase size={14} />
-                                    <span>{applicant.experience}</span>
-                                </div>
-                            </div>
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400">{applicant.appliedAt}</span>
-                        </div>
-
-                        {/* Location */}
-                        <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 mb-3">
-                            <MapPin size={14} className="text-neutral-500 dark:text-neutral-500" />
-                            <span>{applicant.location}</span>
-                        </div>
-
-                        {/* Skills */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {applicant.skills.slice(0, 3).map((skill, i) => (
-                                <span
-                                    key={i}
-                                    className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                        isDaily
-                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                                            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                        {applicants.map((applicant, index) => (
+                            <motion.div
+                                key={applicant.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                onClick={() => setSelectedApplicant(applicant)}
+                                className={`group relative cursor-pointer p-6 pl-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 ${isDark
+                                    ? 'bg-white/[0.04] border border-white/10 hover:border-white/20'
+                                    : 'bg-white border border-neutral-200 hover:shadow-lg'
                                     }`}
-                                >
-                                    {skill}
-                                </span>
-                            ))}
-                            {applicant.skills.length > 3 && (
-                                <span className="px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400">
-                                    +{applicant.skills.length - 3} more
-                                </span>
-                            )}
-                        </div>
+                            >
+                                {/* Left Accent Line */}
+                                <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
+                                {/* Header with Avatar and Basic Info */}
+                                <div className="flex items-start gap-4 mb-4">
+                                    <img
+                                        src={applicant.avatar}
+                                        alt={applicant.name}
+                                        className={`w-16 h-16 rounded-full object-cover border-2 ${isDark ? 'border-white/20' : 'border-black'}`}
+                                    />
+                                    <div className="flex-1">
+                                        <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-black'}`}>{applicant.name}</h3>
+                                        <div className={`flex items-center gap-2 text-sm mt-1 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                                            <Star size={14} className="fill-amber-400 text-amber-400" />
+                                            <span className="font-medium">{applicant.rating}</span>
+                                            <span className="mx-1">•</span>
+                                            <Briefcase size={14} />
+                                            <span>{applicant.experience}</span>
+                                        </div>
+                                    </div>
+                                    <span className={`text-xs font-medium ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>{applicant.appliedAt}</span>
+                                </div>
 
-                        {/* Actions */}
-                        <div className="flex gap-2 pt-3 border-t border-neutral-200 dark:border-neutral-700">
-                            <a
-                                href={`tel:${applicant.phone}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 text-sm font-medium hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-                            >
-                                <Phone size={14} />
-                                Call
-                            </a>
-                            <a
-                                href={`mailto:${applicant.email}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 text-sm font-medium hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-                            >
-                                <Mail size={14} />
-                                Email
-                            </a>
-                        </div>
+                                {/* Location */}
+                                <div className={`flex items-center gap-2 text-sm mb-3 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                                    <MapPin size={14} className="opacity-70" />
+                                    <span>{applicant.location}</span>
+                                </div>
+
+                                {/* Skills */}
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {applicant.skills.slice(0, 3).map((skill, i) => (
+                                        <span
+                                            key={i}
+                                            className={`px-2.5 py-1 rounded-lg text-xs font-bold ${isDark
+                                                ? 'bg-white/10 text-white'
+                                                : 'bg-neutral-100 text-black'
+                                                }`}
+                                        >
+                                            {skill}
+                                        </span>
+                                    ))}
+                                    {applicant.skills.length > 3 && (
+                                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${isDark ? 'bg-white/5 text-neutral-400' : 'bg-neutral-50 text-neutral-500'}`}>
+                                            +{applicant.skills.length - 3} more
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Actions */}
+                                <div className={`flex gap-2 pt-4 border-t ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+                                    <a
+                                        href={`tel:${applicant.phone}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${isDark
+                                            ? 'bg-white/10 text-white hover:bg-white/20'
+                                            : 'bg-neutral-100 text-black hover:bg-neutral-200'
+                                            }`}
+                                    >
+                                        <Phone size={14} />
+                                        Call
+                                    </a>
+                                    <a
+                                        href={`mailto:${applicant.email}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${isDark
+                                            ? 'bg-white/10 text-white hover:bg-white/20'
+                                            : 'bg-neutral-100 text-black hover:bg-neutral-200'
+                                            }`}
+                                    >
+                                        <Mail size={14} />
+                                        Email
+                                    </a>
+                                </div>
+                            </motion.div>
+                        ))}
                     </motion.div>
-                ))}
-            </div>
+                ) : (
+                    <motion.div
+                        key="list"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="relative z-10 space-y-3"
+                    >
+                        {/* List Header */}
+                        <div className={`grid grid-cols-12 gap-4 px-6 py-3 text-[11px] uppercase tracking-wider font-bold ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                            <div className="col-span-4">Name</div>
+                            <div className="col-span-2">Rating</div>
+                            <div className="col-span-3">Location</div>
+                            <div className="col-span-2">Experience</div>
+                            <div className="col-span-1 text-right">Applied</div>
+                        </div>
+                        {applicants.map((applicant, index) => (
+                            <motion.div
+                                key={applicant.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                onClick={() => setSelectedApplicant(applicant)}
+                                className={`group relative grid grid-cols-12 gap-4 items-center cursor-pointer pl-8 pr-6 py-4 rounded-xl transition-all duration-200 ${isDark
+                                    ? 'bg-white/[0.04] border border-white/10 hover:border-white/20'
+                                    : 'bg-white border border-neutral-200 hover:shadow-md'
+                                    }`}
+                            >
+                                {/* Left Accent Line */}
+                                <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
+
+                                {/* Name & Avatar */}
+                                <div className="col-span-4 flex items-center gap-3">
+                                    <img src={applicant.avatar} alt={applicant.name} className={`w-10 h-10 rounded-full object-cover border ${isDark ? 'border-white/20' : 'border-neutral-300'}`} />
+                                    <div>
+                                        <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{applicant.name}</div>
+                                        <div className={`text-xs ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                                            {applicant.skills.slice(0, 2).join(', ')}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Rating */}
+                                <div className="col-span-2 flex items-center gap-1">
+                                    <Star size={14} className="fill-amber-400 text-amber-400" />
+                                    <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{applicant.rating}</span>
+                                </div>
+
+                                {/* Location */}
+                                <div className={`col-span-3 flex items-center gap-2 text-sm ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                                    <MapPin size={14} className="opacity-70" />
+                                    <span className="truncate">{applicant.location}</span>
+                                </div>
+
+                                {/* Experience */}
+                                <div className={`col-span-2 text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                                    {applicant.experience}
+                                </div>
+
+                                {/* Applied */}
+                                <div className={`col-span-1 text-xs text-right ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                                    {applicant.appliedAt}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Expanded Applicant Modal */}
             <AnimatePresence>
@@ -230,28 +364,29 @@ const Applicants: React.FC = () => {
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-2xl max-h-[90vh] z-50 overflow-auto"
                         >
-                            <div className="rounded-2xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-2xl overflow-hidden">
+                            <div className={`rounded-2xl overflow-hidden shadow-2xl ${isDark ? 'bg-[#0a0a0b] border-2 border-white/20' : 'bg-white border-2 border-black'}`}>
                                 {/* Close Button */}
                                 <button
                                     onClick={() => setSelectedApplicant(null)}
-                                    className="absolute top-4 right-4 z-10 p-2 rounded-lg bg-white dark:bg-neutral-800 border-2 border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors shadow-lg"
+                                    className={`absolute top-4 right-4 z-10 p-2 rounded-lg transition-colors shadow-lg ${isDark
+                                        ? 'bg-white/10 hover:bg-white/20 text-white'
+                                        : 'bg-neutral-100 hover:bg-neutral-200 text-black'
+                                        }`}
                                 >
-                                    <X size={20} className="text-neutral-700 dark:text-neutral-300" />
+                                    <X size={20} />
                                 </button>
 
                                 {/* Header */}
-                                <div className={`px-6 py-6 ${isDaily ? 'bg-emerald-500/10 dark:bg-emerald-500/20' : 'bg-amber-500/10 dark:bg-amber-500/20'}`}>
+                                <div className={`px-6 py-6 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
                                     <div className="flex items-start gap-4">
                                         <img
                                             src={selectedApplicant.avatar}
                                             alt={selectedApplicant.name}
-                                            className={`w-20 h-20 rounded-full object-cover border-3 ${
-                                                isDaily ? 'border-emerald-500' : 'border-amber-500'
-                                            }`}
+                                            className={`w-20 h-20 rounded-full object-cover border-3 ${isDark ? 'border-white/30' : 'border-black'}`}
                                         />
                                         <div className="flex-1">
-                                            <h3 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{selectedApplicant.name}</h3>
-                                            <div className="flex items-center gap-3 text-sm text-neutral-600 dark:text-neutral-400 mt-2">
+                                            <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-black'}`}>{selectedApplicant.name}</h3>
+                                            <div className={`flex items-center gap-3 text-sm mt-2 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                                                 <div className="flex items-center gap-1">
                                                     <Star size={14} className="fill-amber-400 text-amber-400" />
                                                     <span className="font-medium">{selectedApplicant.rating}</span>
@@ -267,7 +402,7 @@ const Applicants: React.FC = () => {
                                                     <span>{selectedApplicant.appliedAt}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 mt-2">
+                                            <div className={`flex items-center gap-2 text-sm mt-2 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                                                 <MapPin size={14} />
                                                 <span>{selectedApplicant.location}</span>
                                             </div>
@@ -279,22 +414,21 @@ const Applicants: React.FC = () => {
                                 <div className="p-6 space-y-6">
                                     {/* Bio */}
                                     <div>
-                                        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-wider">About</h4>
-                                        <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed">{selectedApplicant.bio}</p>
+                                        <h4 className={`text-sm font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>About</h4>
+                                        <p className={`leading-relaxed ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>{selectedApplicant.bio}</p>
                                     </div>
 
                                     {/* Skills */}
                                     <div>
-                                        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3 uppercase tracking-wider">Skills</h4>
+                                        <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>Skills</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {selectedApplicant.skills.map((skill, i) => (
                                                 <span
                                                     key={i}
-                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                                                        isDaily
-                                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-600'
-                                                            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-600'
-                                                    }`}
+                                                    className={`px-3 py-1.5 rounded-lg text-sm font-bold ${isDark
+                                                        ? 'bg-white/10 text-white border border-white/10'
+                                                        : 'bg-neutral-100 text-black border border-neutral-200'
+                                                        }`}
                                                 >
                                                     {skill}
                                                 </span>
@@ -304,17 +438,17 @@ const Applicants: React.FC = () => {
 
                                     {/* Contact Info */}
                                     <div>
-                                        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3 uppercase tracking-wider">Contact Information</h4>
+                                        <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>Contact Information</h4>
                                         <div className="space-y-2">
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <Phone size={16} className="text-neutral-500 dark:text-neutral-400" />
-                                                <a href={`tel:${selectedApplicant.phone}`} className="text-neutral-700 dark:text-neutral-300 hover:underline">
+                                            <div className={`flex items-center gap-3 text-sm ${isDark ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                                                <Phone size={16} className="opacity-70" />
+                                                <a href={`tel:${selectedApplicant.phone}`} className="hover:underline">
                                                     {selectedApplicant.phone}
                                                 </a>
                                             </div>
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <Mail size={16} className="text-neutral-500 dark:text-neutral-400" />
-                                                <a href={`mailto:${selectedApplicant.email}`} className="text-neutral-700 dark:text-neutral-300 hover:underline">
+                                            <div className={`flex items-center gap-3 text-sm ${isDark ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                                                <Mail size={16} className="opacity-70" />
+                                                <a href={`mailto:${selectedApplicant.email}`} className="hover:underline">
                                                     {selectedApplicant.email}
                                                 </a>
                                             </div>
@@ -325,17 +459,19 @@ const Applicants: React.FC = () => {
                                     <div className="flex gap-3 pt-4">
                                         <a
                                             href={`tel:${selectedApplicant.phone}`}
-                                            className="flex-1 py-3 rounded-lg bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors flex items-center justify-center gap-2"
+                                            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${isDark
+                                                ? 'bg-white/10 text-white hover:bg-white/20'
+                                                : 'bg-neutral-200 text-black hover:bg-neutral-300'
+                                                }`}
                                         >
                                             <Phone size={16} />
                                             Call Applicant
                                         </a>
                                         <button
-                                            className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 ${
-                                                isDaily
-                                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                                                    : 'bg-amber-500 hover:bg-amber-600 text-black'
-                                            }`}
+                                            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 ${isDark
+                                                ? 'bg-white text-black hover:bg-neutral-200'
+                                                : 'bg-black text-white hover:bg-neutral-800'
+                                                }`}
                                         >
                                             <Download size={16} />
                                             Download Resume

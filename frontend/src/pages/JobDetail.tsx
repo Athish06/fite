@@ -20,6 +20,9 @@ import {
 } from 'lucide-react';
 import { LocationMap } from '../components/ui/expand-map';
 import { EncryptedText } from '../components/ui/encrypted-text';
+import { useTheme } from '../context/ThemeContext';
+import { useMode } from '../context/ModeContext';
+import PixelBlast from '../components/PixelBlast';
 
 interface Worker {
     id: number;
@@ -33,12 +36,14 @@ interface Worker {
 
 const JobDetail: React.FC = () => {
     const { mode, jobId } = useParams();
+    const { mode: contextMode } = useMode();
+    const { isDark } = useTheme();
     const navigate = useNavigate();
     const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
     const [negotiationPrice, setNegotiationPrice] = useState(800);
     const [isMapLoading, setIsMapLoading] = useState(false);
 
-    const isDaily = mode === 'daily';
+    const isDaily = mode === 'daily' || contextMode === 'daily';
 
     const jobData = {
         id: jobId,
@@ -89,105 +94,116 @@ const JobDetail: React.FC = () => {
     }, [negotiationPrice]);
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Same as PostedJobs */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-gray-100 dark:bg-neutral-900" style={{ left: 0, right: 0 }}>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-25 brightness-100 contrast-150"></div>
-                <div className={`absolute top-[-30%] right-[-20%] w-[80%] h-[80%] rounded-full ${isDaily ? 'bg-green-500/10' : 'bg-yellow-500/10'} blur-[140px]`} />
-                <div className={`absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full ${isDaily ? 'bg-emerald-500/8' : 'bg-orange-500/8'} blur-[120px]`} />
-                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] rounded-full ${isDaily ? 'bg-green-400/5' : 'bg-yellow-400/5'} blur-[160px]`} />
+        <div className={`w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8 transition-colors duration-500 ${isDark ? 'bg-[#09090b]' : 'bg-[#F5F8FA]'}`}>
+            {/* PixelBlast Background - Same as PostedJobs */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <PixelBlast
+                    variant="circle"
+                    pixelSize={5}
+                    color={isDaily ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f59e0b' : '#d97706')}
+                    patternScale={2.5}
+                    patternDensity={isDark ? 0.6 : 0.8}
+                    pixelSizeJitter={0.4}
+                    enableRipples
+                    rippleSpeed={0.3}
+                    rippleThickness={0.1}
+                    rippleIntensityScale={1.2}
+                    liquid={false}
+                    speed={0.2}
+                    edgeFade={0.3}
+                    transparent
+                />
+                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-b from-[#09090b]/70 via-[#09090b]/50 to-[#09090b]/80' : 'bg-gradient-to-b from-[#F5F8FA]/80 via-[#F5F8FA]/60 to-[#F5F8FA]/90'}`} />
             </div>
 
             {/* Header */}
             <div className="relative z-10 flex items-center justify-between mb-6">
                 <button
                     onClick={() => navigate('/posted-jobs')}
-                    className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all shadow-sm"
+                    className={`group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDark
+                        ? 'bg-white text-black hover:bg-neutral-200'
+                        : 'bg-black text-white hover:bg-neutral-800'
+                        }`}
                 >
                     <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
                     <span>Back to Jobs</span>
                 </button>
-
-                <div
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${
-                        isDaily
-                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-600'
-                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-600'
-                    }`}
-                >
-                    {isDaily ? 'Daily Wage' : 'Long Term'}
-                </div>
             </div>
 
             {/* Main Job Card */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative z-10 mb-6 p-6 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-sm"
+                className={`relative z-10 mb-6 p-6 pl-8 rounded-2xl transition-all ${isDark
+                    ? 'bg-white/[0.04] border border-white/10'
+                    : 'bg-white border border-neutral-200 shadow-lg'
+                    }`}
             >
-                {/* Colored Accent Line */}
-                <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-full ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                {/* Left Accent Line - Black */}
+                <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
 
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 pl-4">
                     <div className="flex-1 space-y-4">
                         <div className="flex items-start gap-3">
-                            <div
-                                className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-bold ${
-                                    isDaily 
-                                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-600' 
-                                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-600'
-                                }`}
-                            >
+                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold ${isDark ? 'bg-white/10 text-white' : 'bg-neutral-100 text-black'
+                                }`}>
                                 <Briefcase size={12} />
                                 {jobData.category}
                             </div>
                         </div>
-                        
-                        <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{jobData.title}</h1>
-                        
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 dark:text-neutral-400">
-                            <span className="flex items-center gap-1.5">
-                                <MapPin size={14} className="text-neutral-500" />
+
+                        <h1 className={`text-3xl md:text-4xl font-black leading-tight ${isDark ? 'text-white' : 'text-black'}`}>
+                            {jobData.title}
+                        </h1>
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm">
+                            <span className={`flex items-center gap-1.5 font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                                <MapPin size={14} className="opacity-70" />
                                 {jobData.location}
                             </span>
-                            <span className="flex items-center gap-1.5">
-                                <Clock size={14} className="text-neutral-500" />
+                            <span className={`flex items-center gap-1.5 font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                                <Clock size={14} className="opacity-70" />
                                 {jobData.postedAt}
                             </span>
-                            <span className="flex items-center gap-1.5">
-                                <Navigation size={14} className="text-neutral-500" />
+                            <span className={`flex items-center gap-1.5 font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                                <Navigation size={14} className="opacity-70" />
                                 {jobData.time}
                             </span>
                         </div>
                     </div>
 
                     <div className="flex flex-col items-start lg:items-end gap-3 min-w-[200px]">
-                        <div className={`text-3xl font-black ${isDaily ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                        <div className={`text-3xl md:text-4xl font-black ${isDark ? 'text-white' : 'text-black'}`}>
                             {jobData.pay}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                            <Users size={16} className="text-neutral-500" />
-                            <span className="font-semibold text-neutral-800 dark:text-neutral-200">{jobData.applicants}</span>
+                        <div className={`flex items-center gap-2 text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                            <Users size={16} className="opacity-70" />
+                            <span className={`font-bold ${isDark ? 'text-white' : 'text-black'}`}>{jobData.applicants}</span>
                             <span>applicants</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                            <Calendar size={16} className="text-neutral-500" />
+                        <div className={`flex items-center gap-2 text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                            <Calendar size={16} className="opacity-70" />
                             <span>{jobData.date}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Location Section */}
-                <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-                    <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
+                <div className={`mt-6 pt-6 border-t ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+                    <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between pl-4">
                         <div className="flex-1">
-                            <p className="text-[11px] uppercase tracking-wider font-semibold text-neutral-500 dark:text-neutral-400 mb-3">Posted Job Location</p>
-                            <LocationMap location={jobData.location} coordinates="12.9716° N, 77.5946° E" className="mb-2" />
-                            <p className="text-[10px] text-neutral-400 dark:text-neutral-500">Interactive map widget with live location</p>
+                            <p className={`text-[11px] uppercase tracking-wider font-bold mb-3 ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                                Posted Job Location
+                            </p>
+                            <LocationMap location={jobData.location} coordinates="12.9716° N, 77.5946° E" className="mb-2" isDark={isDark} />
+                            <p className={`text-[10px] ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>Interactive map widget with live location</p>
                         </div>
                         <button
                             onClick={handleLocationOpen}
-                            className="self-start lg:self-end inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-all shadow-lg"
+                            className={`self-start lg:self-end inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg hover:scale-105 ${isDark
+                                ? 'bg-white text-black hover:bg-neutral-200'
+                                : 'bg-black text-white hover:bg-neutral-800'
+                                }`}
                         >
                             <Map size={18} />
                             Open Full Map
@@ -203,10 +219,13 @@ const JobDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="p-6 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-sm"
+                    className={`p-6 rounded-2xl transition-all ${isDark
+                        ? 'bg-white/[0.04]'
+                        : 'bg-white'
+                        }`}
                 >
-                    <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-3">Description</h3>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">{jobData.description}</p>
+                    <h3 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-black'}`}>Description</h3>
+                    <p className={`text-sm leading-relaxed ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>{jobData.description}</p>
                 </motion.div>
 
                 {/* Requirements */}
@@ -214,13 +233,16 @@ const JobDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="p-6 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-sm"
+                    className={`p-6 rounded-2xl transition-all ${isDark
+                        ? 'bg-white/[0.04]'
+                        : 'bg-white'
+                        }`}
                 >
-                    <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-3">Requirements</h3>
+                    <h3 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-black'}`}>Requirements</h3>
                     <ul className="space-y-2.5">
                         {jobData.requirements.map((req, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm text-neutral-600 dark:text-neutral-300">
-                                <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                            <li key={i} className={`flex items-start gap-3 text-sm ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                                <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${isDark ? 'bg-white' : 'bg-black'}`} />
                                 <span>{req}</span>
                             </li>
                         ))}
@@ -234,81 +256,89 @@ const JobDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="relative z-10 p-6 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-sm mb-20"
+                    className={`z-10 p-6 rounded-2xl mb-20 ${isDark
+                        ? 'bg-white/[0.04]'
+                        : 'bg-white'
+                        }`}
                 >
                     <div className="flex items-center justify-between mb-5">
-                        <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">Applicant Workers</h3>
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">Click to negotiate</span>
+                        <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-black'}`}>Applicant Workers</h3>
+                        <span className={`text-xs font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>Click to negotiate</span>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {nearbyWorkers.map((worker) => (
                             <motion.div
                                 key={worker.id}
-                                whileHover={{ y: -4 }}
                                 onClick={() => handleWorkerSelect(worker)}
-                                className={`relative cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                                    worker.status === 'accepted'
-                                        ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 dark:border-emerald-600'
-                                        : worker.status === 'waiting'
-                                        ? 'bg-white dark:bg-neutral-700/50 border-neutral-300 dark:border-neutral-600 hover:border-emerald-400 dark:hover:border-emerald-500'
-                                        : 'bg-neutral-50 dark:bg-neutral-700/30 border-neutral-200 dark:border-neutral-700 opacity-50'
-                                }`}
+                                className={`relative cursor-pointer p-4 pl-6 rounded-xl border transition-all ${worker.status === 'accepted'
+                                    ? isDark
+                                        ? 'bg-emerald-500/10 border-emerald-500/30'
+                                        : 'bg-emerald-50 border-emerald-300'
+                                    : worker.status === 'waiting'
+                                        ? isDark
+                                            ? 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                                            : 'bg-white border-neutral-200 hover:border-neutral-400'
+                                        : isDark
+                                            ? 'bg-white/[0.01] border-white/10 opacity-50'
+                                            : 'bg-neutral-50 border-neutral-200 opacity-50'
+                                    }`}
                             >
+                                {/* Left accent line for worker cards */}
+                                <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-full ${worker.status === 'accepted'
+                                    ? 'bg-emerald-500'
+                                    : isDark ? 'bg-white/50' : 'bg-black/50'
+                                    }`} />
                                 {worker.status === 'accepted' && (
-                                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
                                         <Check size={14} className="text-white" />
                                     </div>
                                 )}
-                                
+
                                 <div className="flex flex-col items-center text-center gap-3">
                                     <div className="relative">
-                                        <img 
-                                            src={worker.avatar} 
-                                            alt={worker.name} 
-                                            className={`w-16 h-16 rounded-full object-cover border-2 ${
-                                                worker.status === 'accepted' 
-                                                    ? 'border-emerald-500' 
-                                                    : 'border-neutral-300 dark:border-neutral-600'
-                                            }`} 
+                                        <img
+                                            src={worker.avatar}
+                                            alt={worker.name}
+                                            className={`w-16 h-16 rounded-full object-cover border-2 ${worker.status === 'accepted'
+                                                ? 'border-emerald-500'
+                                                : isDark ? 'border-white/20' : 'border-neutral-300'
+                                                }`}
                                         />
                                         {worker.status === 'waiting' && (
-                                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 border-2 border-white dark:border-neutral-800 flex items-center justify-center">
+                                            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 border-2 flex items-center justify-center ${isDark ? 'border-[#09090b]' : 'border-white'}`}>
                                                 <Clock size={10} className="text-white" />
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     <div className="w-full">
-                                        <div className="font-semibold text-sm text-neutral-800 dark:text-neutral-100">{worker.name}</div>
-                                        <div className="flex items-center justify-center gap-1 text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+                                        <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-neutral-900'}`}>{worker.name}</div>
+                                        <div className={`flex items-center justify-center gap-1 text-xs mt-1 ${isDark ? 'text-neutral-400' : 'text-neutral-700'}`}>
                                             <Star size={12} className="fill-amber-400 text-amber-400" />
                                             <span>{worker.rating}</span>
                                             <span className="mx-1">•</span>
                                             <span>{worker.distance}</span>
                                         </div>
                                         {worker.status === 'accepted' && (
-                                            <div className="mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                                Primary Worker
-                                            </div>
+                                            <div className={`mt-2 text-xs font-bold ${isDark ? 'text-white' : 'text-black'}`}>Primary Worker</div>
                                         )}
                                         {worker.status === 'waiting' && (
-                                            <div className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">
-                                                In Queue
-                                            </div>
+                                            <div className={`mt-2 text-xs font-semibold ${isDark ? 'text-neutral-400' : 'text-neutral-700'}`}>In Queue</div>
                                         )}
                                     </div>
 
                                     <a
                                         href={`tel:${worker.phone}`}
                                         onClick={(e) => e.stopPropagation()}
-                                        className={`w-full py-2 rounded-lg text-xs font-medium transition-colors ${
-                                            worker.status === 'accepted'
-                                                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                                                : 'bg-neutral-200 dark:bg-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-500'
-                                        }`}
+                                        className={`w-full py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1 ${worker.status === 'accepted'
+                                            ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                            : isDark
+                                                ? 'bg-white text-black hover:bg-neutral-200'
+                                                : 'bg-black text-white hover:bg-neutral-800'
+                                            }`}
                                     >
-                                        <Phone size={12} className="inline mr-1" />
+                                        <Phone size={12} />
                                         Call
                                     </a>
                                 </div>
@@ -322,7 +352,6 @@ const JobDetail: React.FC = () => {
             <AnimatePresence>
                 {selectedWorker && (
                     <>
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -331,26 +360,25 @@ const JobDetail: React.FC = () => {
                             onClick={() => setSelectedWorker(null)}
                         />
 
-                        {/* Modal */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-50"
                         >
-                            <div className="rounded-2xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-2xl overflow-hidden">
+                            <div className={`rounded-2xl overflow-hidden shadow-2xl ${isDark ? 'bg-[#0a0a0b] border-2 border-white/20' : 'bg-white border-2 border-black'}`}>
                                 {/* Header */}
-                                <div className={`px-6 py-5 ${isDaily ? 'bg-emerald-500/10 dark:bg-emerald-500/20' : 'bg-amber-500/10 dark:bg-amber-500/20'}`}>
+                                <div className={`px-6 py-5 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-4">
-                                            <img 
-                                                src={selectedWorker.avatar} 
-                                                alt={selectedWorker.name} 
-                                                className="w-14 h-14 rounded-full border-2 border-emerald-500 object-cover" 
+                                            <img
+                                                src={selectedWorker.avatar}
+                                                alt={selectedWorker.name}
+                                                className={`w-14 h-14 rounded-full border-2 object-cover ${isDark ? 'border-white/20' : 'border-black'}`}
                                             />
                                             <div>
-                                                <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100">{selectedWorker.name}</h3>
-                                                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
+                                                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-black'}`}>{selectedWorker.name}</h3>
+                                                <div className={`flex items-center gap-2 text-sm mt-0.5 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                                                     <Star size={12} className="fill-amber-400 text-amber-400" />
                                                     <span>{selectedWorker.rating}</span>
                                                     <span>•</span>
@@ -360,7 +388,7 @@ const JobDetail: React.FC = () => {
                                         </div>
                                         <button
                                             onClick={() => setSelectedWorker(null)}
-                                            className="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 transition-colors"
+                                            className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-neutral-400' : 'hover:bg-black/5 text-neutral-600'}`}
                                         >
                                             <X size={20} />
                                         </button>
@@ -370,47 +398,41 @@ const JobDetail: React.FC = () => {
                                 {/* Body */}
                                 <div className="p-6 space-y-6">
                                     <div>
-                                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-500 dark:text-neutral-400 mb-3">
+                                        <label className={`block text-[11px] uppercase tracking-wider font-bold mb-3 ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                                             Negotiate Price
                                         </label>
-                                        
+
                                         {/* Current Price Display */}
-                                        <div className="flex items-center justify-between p-4 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 mb-4">
-                                            <span className="text-sm text-neutral-600 dark:text-neutral-400">Original Price</span>
-                                            <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">₹800</span>
+                                        <div className={`flex items-center justify-between p-4 rounded-xl mb-4 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
+                                            <span className={`text-sm font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>Original Price</span>
+                                            <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-black'}`}>₹800</span>
                                         </div>
 
                                         {/* Price Input with Increment/Decrement */}
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Your Offer</span>
+                                                <span className={`text-sm font-semibold ${isDark ? 'text-neutral-300' : 'text-neutral-700'}`}>Your Offer</span>
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         onClick={() => incrementPrice(-50)}
-                                                        className="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors"
+                                                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-200 text-black hover:bg-neutral-300'}`}
                                                     >
                                                         <Minus size={14} />
                                                     </button>
-                                                    
-                                                    <div className={`relative flex items-center gap-1 px-4 py-2 rounded-lg border-2 ${
-                                                        isDaily 
-                                                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' 
-                                                            : 'border-amber-500 bg-amber-50 dark:bg-amber-950/20'
-                                                    }`}>
-                                                        <IndianRupee size={16} className={isDaily ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'} />
+
+                                                    <div className={`relative flex items-center gap-1 px-4 py-2 rounded-lg border-2 ${isDark ? 'border-white/30 bg-white/5' : 'border-black bg-neutral-50'}`}>
+                                                        <IndianRupee size={16} className={isDark ? 'text-white' : 'text-black'} />
                                                         <input
                                                             type="number"
                                                             value={negotiationPrice}
                                                             onChange={(e) => setNegotiationPrice(Number(e.target.value))}
-                                                            className={`w-20 bg-transparent text-xl font-black text-center focus:outline-none ${
-                                                                isDaily ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
-                                                            }`}
+                                                            className={`w-20 bg-transparent text-xl font-black text-center focus:outline-none ${isDark ? 'text-white' : 'text-black'}`}
                                                         />
                                                     </div>
-                                                    
+
                                                     <button
                                                         onClick={() => incrementPrice(50)}
-                                                        className="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors"
+                                                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-200 text-black hover:bg-neutral-300'}`}
                                                     >
                                                         <Plus size={14} />
                                                     </button>
@@ -418,19 +440,18 @@ const JobDetail: React.FC = () => {
                                             </div>
 
                                             {/* Quick Amount Buttons */}
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Quick:</span>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className={`text-xs ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>Quick:</span>
                                                 {[600, 700, 800, 900, 1000].map((amount) => (
                                                     <button
                                                         key={amount}
                                                         onClick={() => setNegotiationPrice(amount)}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                            negotiationPrice === amount
-                                                                ? isDaily
-                                                                    ? 'bg-emerald-500 text-white'
-                                                                    : 'bg-amber-500 text-black'
-                                                                : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-                                                        }`}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${negotiationPrice === amount
+                                                            ? isDark ? 'bg-white text-black' : 'bg-black text-white'
+                                                            : isDark
+                                                                ? 'bg-white/10 text-white hover:bg-white/20'
+                                                                : 'bg-neutral-200 text-black hover:bg-neutral-300'
+                                                            }`}
                                                     >
                                                         ₹{amount}
                                                     </button>
@@ -445,18 +466,12 @@ const JobDetail: React.FC = () => {
                                                 step={50}
                                                 value={negotiationPrice}
                                                 onChange={(e) => setNegotiationPrice(Number(e.target.value))}
-                                                className={`w-full h-2 rounded-full appearance-none cursor-pointer ${
-                                                    isDaily ? 'accent-emerald-500' : 'accent-amber-500'
-                                                }`}
+                                                className={`w-full h-2 rounded-full appearance-none cursor-pointer ${isDark ? 'accent-white' : 'accent-black'}`}
                                                 style={{
-                                                    background: `linear-gradient(to right, ${isDaily ? '#10b981' : '#f59e0b'} 0%, ${
-                                                        isDaily ? '#10b981' : '#f59e0b'
-                                                    } ${((negotiationPrice - 500) / 1000) * 100}%, ${
-                                                        'rgb(212 212 212 / 0.3)'
-                                                    } ${((negotiationPrice - 500) / 1000) * 100}%, ${'rgb(212 212 212 / 0.3)'} 100%)`,
+                                                    background: `linear-gradient(to right, ${isDark ? '#fff' : '#000'} 0%, ${isDark ? '#fff' : '#000'} ${((negotiationPrice - 500) / 1000) * 100}%, ${isDark ? 'rgb(255 255 255 / 0.1)' : 'rgb(212 212 212 / 0.5)'} ${((negotiationPrice - 500) / 1000) * 100}%, ${isDark ? 'rgb(255 255 255 / 0.1)' : 'rgb(212 212 212 / 0.5)'} 100%)`,
                                                 }}
                                             />
-                                            <div className="flex justify-between text-[10px] text-neutral-400">
+                                            <div className={`flex justify-between text-[10px] ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>
                                                 <span>₹500</span>
                                                 <span>₹1500</span>
                                             </div>
@@ -467,17 +482,19 @@ const JobDetail: React.FC = () => {
                                     <div className="flex gap-3 pt-2">
                                         <a
                                             href={`tel:${selectedWorker.phone}`}
-                                            className="flex-1 py-3 rounded-lg bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors flex items-center justify-center gap-2"
+                                            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${isDark
+                                                ? 'bg-white/10 text-white hover:bg-white/20'
+                                                : 'bg-neutral-200 text-black hover:bg-neutral-300'
+                                                }`}
                                         >
                                             <Phone size={16} />
                                             Call Worker
                                         </a>
                                         <button
-                                            className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all hover:scale-[1.02] shadow-lg ${
-                                                isDaily 
-                                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
-                                                    : 'bg-amber-500 hover:bg-amber-600 text-black'
-                                            }`}
+                                            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] shadow-lg ${isDark
+                                                ? 'bg-white text-black hover:bg-neutral-200'
+                                                : 'bg-black text-white hover:bg-neutral-800'
+                                                }`}
                                         >
                                             Send Offer
                                         </button>
@@ -498,16 +515,16 @@ const JobDetail: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-8 py-6 shadow-2xl flex flex-col items-center gap-4">
-                            <div className="h-12 w-12 rounded-full border-3 border-emerald-500 border-t-transparent animate-spin" />
+                        <div className={`rounded-2xl px-8 py-6 shadow-2xl flex flex-col items-center gap-4 ${isDark ? 'bg-[#0a0a0b] border-2 border-white/20' : 'bg-white border-2 border-black'}`}>
+                            <div className={`h-12 w-12 rounded-full border-4 border-t-transparent animate-spin ${isDark ? 'border-white' : 'border-black'}`} />
                             <EncryptedText
                                 text="Loading maps..."
-                                encryptedClassName="text-neutral-400"
-                                revealedClassName="text-neutral-800 dark:text-neutral-200"
-                                className="text-base font-semibold"
+                                encryptedClassName={isDark ? 'text-neutral-400' : 'text-neutral-500'}
+                                revealedClassName={isDark ? 'text-white' : 'text-black'}
+                                className="text-base font-bold"
                                 revealDelayMs={60}
                             />
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400">Preparing full interactive map view</p>
+                            <p className={`text-xs ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>Preparing full interactive map view</p>
                         </div>
                     </motion.div>
                 )}
