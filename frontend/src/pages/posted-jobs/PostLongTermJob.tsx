@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Stepper, { Step } from '../components/ui/Stepper';
+import Stepper, { Step } from '../../components/ui/Stepper';
 import { Briefcase, FileText, IndianRupee, MapPin, Award } from 'lucide-react';
 
 const PostLongTermJob: React.FC = () => {
@@ -77,11 +77,10 @@ const PostLongTermJob: React.FC = () => {
                                         <button
                                             key={type}
                                             onClick={() => setJobType(type)}
-                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                                                jobType === type
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${jobType === type
                                                     ? 'bg-yellow-500 text-white shadow-lg scale-105'
                                                     : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                                            }`}
+                                                }`}
                                         >
                                             {type}
                                         </button>
@@ -98,11 +97,10 @@ const PostLongTermJob: React.FC = () => {
                                         <button
                                             key={type}
                                             onClick={() => setEmploymentType(type)}
-                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                                                employmentType === type
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${employmentType === type
                                                     ? 'bg-yellow-500 text-white shadow-lg scale-105'
                                                     : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                                            }`}
+                                                }`}
                                         >
                                             {type}
                                         </button>
@@ -208,11 +206,10 @@ const PostLongTermJob: React.FC = () => {
                                         <button
                                             key={level}
                                             onClick={() => setEducation(level)}
-                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                                                education === level
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${education === level
                                                     ? 'bg-yellow-500 text-white shadow-lg scale-105'
                                                     : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                                            }`}
+                                                }`}
                                         >
                                             {level}
                                         </button>

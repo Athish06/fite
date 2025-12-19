@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Stepper, { Step } from '../components/ui/Stepper';
+import Stepper, { Step } from '../../components/ui/Stepper';
 import { MapPin, IndianRupee, FileText, Briefcase } from 'lucide-react';
 
 const PostDailyJob: React.FC = () => {
@@ -88,11 +88,10 @@ const PostDailyJob: React.FC = () => {
                                         <button
                                             key={cat}
                                             onClick={() => setJobCategory(cat)}
-                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                                                jobCategory === cat
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${jobCategory === cat
                                                     ? 'bg-green-500 text-white shadow-lg scale-105'
                                                     : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                                            }`}
+                                                }`}
                                         >
                                             {cat}
                                         </button>

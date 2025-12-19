@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useMode } from '../context/ModeContext';
+import { useMode } from '../../context/ModeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, Map, MapPin, Clock, IndianRupee, Star, Play, Square, Loader2, Navigation, Phone, X, Briefcase } from 'lucide-react';
-import TextType from '../components/ui/TextType';
-import MapComponent from '../components/MapComponent';
+import { LayoutGrid, Map, MapPin, Clock, IndianRupee, Star, Play, Square, Loader2, Navigation, Phone, X, Briefcase, ChevronDown, Filter } from 'lucide-react';
+import TextType from '../../components/ui/TextType';
+import { LocationMap } from '../../components/ui/expand-map';
 
 interface Job {
     id: number;
@@ -42,6 +42,13 @@ const ExploreJobs: React.FC = () => {
     const [foundJobs, setFoundJobs] = useState<Job[]>([]);
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+    // Filter states for daily wage mode
+    const [showFilters, setShowFilters] = useState(false);
+    const [distanceFilter, setDistanceFilter] = useState('all');
+    const [payMin, setPayMin] = useState('');
+    const [payMax, setPayMax] = useState('');
+    const [showLocationPermission, setShowLocationPermission] = useState(false);
 
     const isDaily = mode === 'daily';
 
@@ -134,16 +141,21 @@ const ExploreJobs: React.FC = () => {
         }
     ];
 
+    const requestLocationAndStart = () => {
+        setShowLocationPermission(true);
+    };
+
     const startExploring = () => {
+        setShowLocationPermission(false);
         setIsLoadingLocation(true);
-        
-        // Simulate getting user location
+
+        // Get user location
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 setUserLocation([position.coords.latitude, position.coords.longitude]);
                 setIsExploring(true);
                 setIsLoadingLocation(false);
-                
+
                 // Simulate finding jobs after a delay
                 setTimeout(() => {
                     setFoundJobs(mockDailyJobs);
@@ -154,7 +166,7 @@ const ExploreJobs: React.FC = () => {
                 setUserLocation([12.9716, 77.5946]);
                 setIsExploring(true);
                 setIsLoadingLocation(false);
-                
+
                 setTimeout(() => {
                     setFoundJobs(mockDailyJobs);
                 }, 2000);
@@ -173,50 +185,50 @@ const ExploreJobs: React.FC = () => {
         const R = 6371; // km
         const dLat = (jobCoords[0] - userLocation[0]) * Math.PI / 180;
         const dLon = (jobCoords[1] - userLocation[1]) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(userLocation[0] * Math.PI / 180) * Math.cos(jobCoords[0] * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(userLocation[0] * Math.PI / 180) * Math.cos(jobCoords[0] * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return (R * c).toFixed(1) + " km";
     };
 
     return (
         <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
             {/* Background Pattern - Watercolor Paper Texture */}
-            <div 
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0" 
-                style={{ 
-                    left: 0, 
+            <div
+                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
+                style={{
+                    left: 0,
                     right: 0,
                     backgroundColor: isDaily ? '#F5F9F7' : '#FAF8F5'
                 }}
             >
                 {/* Grainy Paper Texture */}
-                <div 
+                <div
                     className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
                     style={{ filter: 'contrast(110%) brightness(100%)' }}
                 />
-                
+
                 {/* Organic Watercolor Gradients */}
                 {isDaily ? (
                     <>
-                        <div 
+                        <div
                             className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
-                            style={{ 
+                            style={{
                                 background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
                                 filter: 'blur(60px)'
                             }}
                         />
-                        <div 
+                        <div
                             className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
-                            style={{ 
+                            style={{
                                 background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
                                 filter: 'blur(80px)'
                             }}
                         />
-                        <div 
+                        <div
                             className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
-                            style={{ 
+                            style={{
                                 background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
                                 filter: 'blur(70px)'
                             }}
@@ -224,23 +236,23 @@ const ExploreJobs: React.FC = () => {
                     </>
                 ) : (
                     <>
-                        <div 
+                        <div
                             className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
-                            style={{ 
+                            style={{
                                 background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
                                 filter: 'blur(60px)'
                             }}
                         />
-                        <div 
+                        <div
                             className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
-                            style={{ 
+                            style={{
                                 background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
                                 filter: 'blur(80px)'
                             }}
                         />
-                        <div 
+                        <div
                             className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
-                            style={{ 
+                            style={{
                                 background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
                                 filter: 'blur(70px)'
                             }}
@@ -253,7 +265,7 @@ const ExploreJobs: React.FC = () => {
             <div className="relative z-10 flex items-center justify-between mb-8">
                 {/* Left: Title with Typewriter */}
                 <div>
-                    <h1 className="text-2xl font-semibold tracking-tight text-neutral-800">
+                    <h1 className="text-3xl font-bold tracking-tight text-neutral-800">
                         <TextType
                             text="Explore Jobs"
                             typingSpeed={80}
@@ -283,17 +295,15 @@ const ExploreJobs: React.FC = () => {
                             />
                             <button
                                 onClick={() => setViewMode('card')}
-                                className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${
-                                    viewMode === 'card' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
-                                }`}
+                                className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${viewMode === 'card' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                                    }`}
                             >
                                 <LayoutGrid size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('map')}
-                                className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${
-                                    viewMode === 'map' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
-                                }`}
+                                className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${viewMode === 'map' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                                    }`}
                             >
                                 <Map size={16} />
                             </button>
@@ -303,13 +313,12 @@ const ExploreJobs: React.FC = () => {
                     {/* Explore/Stop Button */}
                     {isDaily && (
                         <button
-                            onClick={isExploring ? stopExploring : startExploring}
+                            onClick={isExploring ? stopExploring : requestLocationAndStart}
                             disabled={isLoadingLocation}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
-                                isExploring 
-                                    ? 'bg-red-500 text-white hover:bg-red-600' 
-                                    : 'bg-neutral-900 text-white hover:bg-neutral-800'
-                            } ${isLoadingLocation ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${isExploring
+                                ? 'bg-red-500 text-white hover:bg-red-600'
+                                : 'bg-neutral-900 text-white hover:bg-neutral-800'
+                                } ${isLoadingLocation ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             {isLoadingLocation ? (
                                 <>
@@ -339,26 +348,130 @@ const ExploreJobs: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="relative z-10 mb-6"
                 >
-                    <div 
-                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-300/80"
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
-                    >
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                            <span className="text-sm font-medium text-neutral-700">Status: Active</span>
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div
+                            className="inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-300/80"
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                <span className="text-sm font-medium text-neutral-700">Status: Active</span>
+                            </div>
+                            <div className="w-px h-4 bg-neutral-300" />
+                            <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                <Navigation size={14} />
+                                <span>Searching for jobs nearby...</span>
+                            </div>
+                            {foundJobs.length > 0 && (
+                                <>
+                                    <div className="w-px h-4 bg-neutral-300" />
+                                    <span className="text-sm font-semibold text-neutral-800">{foundJobs.length} jobs found</span>
+                                </>
+                            )}
                         </div>
-                        <div className="w-px h-4 bg-neutral-300" />
-                        <div className="flex items-center gap-2 text-sm text-neutral-600">
-                            <Navigation size={14} />
-                            <span>Searching for jobs nearby...</span>
-                        </div>
+
+                        {/* Filter Toggle Button */}
                         {foundJobs.length > 0 && (
-                            <>
-                                <div className="w-px h-4 bg-neutral-300" />
-                                <span className="text-sm font-semibold text-neutral-800">{foundJobs.length} jobs found</span>
-                            </>
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${showFilters
+                                    ? 'bg-neutral-900 text-white border-neutral-900'
+                                    : 'bg-white/80 text-neutral-700 border-neutral-300/80 hover:bg-neutral-50'
+                                    }`}
+                                style={!showFilters ? { boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)' } : {}}
+                            >
+                                <Filter size={16} />
+                                Filters
+                                <ChevronDown size={14} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                            </button>
                         )}
                     </div>
+
+                    {/* Filter Panel */}
+                    <AnimatePresence>
+                        {showFilters && foundJobs.length > 0 && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div
+                                    className="mt-4 p-4 rounded-xl border border-neutral-300/80"
+                                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                                >
+                                    <div className="flex flex-wrap items-end gap-6">
+                                        {/* Distance Filter */}
+                                        <div className="flex-1 min-w-[200px]">
+                                            <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                                                <Navigation size={12} className="inline mr-1" />
+                                                Distance
+                                            </label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['all', '2', '5', '10', '20'].map((dist) => (
+                                                    <button
+                                                        key={dist}
+                                                        onClick={() => setDistanceFilter(dist)}
+                                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${distanceFilter === dist
+                                                            ? 'bg-neutral-900 text-white'
+                                                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                                            }`}
+                                                    >
+                                                        {dist === 'all' ? 'Any' : `${dist} km`}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Pay Range Filter */}
+                                        <div className="flex-1 min-w-[250px]">
+                                            <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                                                <IndianRupee size={12} className="inline mr-1" />
+                                                Pay Range (per day)
+                                            </label>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200">
+                                                    <span className="text-xs text-neutral-400">₹</span>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Min"
+                                                        value={payMin}
+                                                        onChange={(e) => setPayMin(e.target.value)}
+                                                        className="bg-transparent text-sm w-20 outline-none text-neutral-800 placeholder:text-neutral-400"
+                                                    />
+                                                </div>
+                                                <span className="text-neutral-400">—</span>
+                                                <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200">
+                                                    <span className="text-xs text-neutral-400">₹</span>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Max"
+                                                        value={payMax}
+                                                        onChange={(e) => setPayMax(e.target.value)}
+                                                        className="bg-transparent text-sm w-20 outline-none text-neutral-800 placeholder:text-neutral-400"
+                                                    />
+                                                </div>
+                                            </div>
+                                            {/* Quick presets */}
+                                            <div className="flex gap-1.5 mt-2">
+                                                <button onClick={() => { setPayMin('500'); setPayMax('800'); }} className="px-2 py-0.5 text-xs rounded bg-neutral-100 text-neutral-600 hover:bg-neutral-200">₹500-800</button>
+                                                <button onClick={() => { setPayMin('800'); setPayMax('1200'); }} className="px-2 py-0.5 text-xs rounded bg-neutral-100 text-neutral-600 hover:bg-neutral-200">₹800-1.2k</button>
+                                                <button onClick={() => { setPayMin('1200'); setPayMax(''); }} className="px-2 py-0.5 text-xs rounded bg-neutral-100 text-neutral-600 hover:bg-neutral-200">₹1.2k+</button>
+                                            </div>
+                                        </div>
+
+                                        {/* Clear Filters */}
+                                        <button
+                                            onClick={() => { setDistanceFilter('all'); setPayMin(''); setPayMax(''); }}
+                                            className="px-4 py-2 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
             )}
 
@@ -375,7 +488,7 @@ const ExploreJobs: React.FC = () => {
                             exit={{ opacity: 0, y: -20 }}
                             className="relative z-10 flex flex-col items-center justify-center py-20"
                         >
-                            <div 
+                            <div
                                 className="p-8 rounded-2xl border border-neutral-300/80 text-center max-w-md"
                                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
                             >
@@ -384,11 +497,11 @@ const ExploreJobs: React.FC = () => {
                                 </div>
                                 <h2 className="text-xl font-semibold text-neutral-800 mb-2">Start Exploring Jobs</h2>
                                 <p className="text-neutral-600 mb-6">
-                                    Click the button above to share your location and start finding daily wage jobs near you. 
+                                    Click the button above to share your location and start finding daily wage jobs near you.
                                     Your profile will be visible to employers looking for workers with your skills.
                                 </p>
                                 <button
-                                    onClick={startExploring}
+                                    onClick={requestLocationAndStart}
                                     className="px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition-colors"
                                 >
                                     <Play size={16} className="inline mr-2" />
@@ -489,43 +602,48 @@ const ExploreJobs: React.FC = () => {
                             ))}
                         </motion.div>
                     ) : (
-                        // Map View
+                        // Map View - Grid of Expandable Location Cards
                         <motion.div
                             key="map"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="relative z-10 rounded-2xl overflow-hidden border border-neutral-300/80"
-                            style={{ height: 'calc(100vh - 250px)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                            className="relative z-10"
                         >
-                            <MapComponent
-                                center={userLocation || [12.9716, 77.5946]}
-                                zoom={13}
-                                markers={[
-                                    ...(userLocation ? [{ position: userLocation, title: 'Your Location' }] : []),
-                                    ...foundJobs.map(job => ({
-                                        position: job.coordinates,
-                                        title: `${job.title} - ${job.pay}`
-                                    }))
-                                ]}
-                            />
-                            
-                            {/* Job Cards Overlay on Map */}
-                            <div className="absolute bottom-4 left-4 right-4 flex gap-3 overflow-x-auto pb-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {foundJobs.map((job) => (
                                     <div
                                         key={job.id}
-                                        onClick={() => setSelectedJob(job)}
-                                        className="shrink-0 w-72 p-4 rounded-xl bg-white/95 backdrop-blur-sm border border-neutral-200 shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                                        className="p-4 rounded-2xl border border-neutral-300/80 cursor-pointer hover:border-neutral-400 transition-all"
+                                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
                                     >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h4 className="font-semibold text-neutral-800">{job.title}</h4>
-                                            <span className="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">{job.distance}</span>
+                                        {/* Job Header */}
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div>
+                                                <h4 className="font-semibold text-neutral-800">{job.title}</h4>
+                                                <p className="text-sm text-neutral-600">{job.employer}</p>
+                                            </div>
+                                            <span className="text-xs px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-medium">
+                                                {calculateDistance(job.coordinates)}
+                                            </span>
                                         </div>
-                                        <p className="text-sm text-neutral-600 mb-2">{job.location}</p>
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-neutral-800">{job.pay}</span>
-                                            <span className="text-xs text-neutral-500">{job.time}</span>
+
+                                        {/* Expandable Map Card */}
+                                        <LocationMap
+                                            location={job.location}
+                                            coordinates={`${job.coordinates[0].toFixed(4)}° N, ${job.coordinates[1].toFixed(4)}° E`}
+                                            isDark={false}
+                                        />
+
+                                        {/* Job Details */}
+                                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-200">
+                                            <span className="font-bold text-neutral-800">{job.pay}</span>
+                                            <button
+                                                onClick={() => setSelectedJob(job)}
+                                                className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white text-xs font-medium hover:bg-neutral-800 transition-colors"
+                                            >
+                                                View Details
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -613,7 +731,7 @@ const ExploreJobs: React.FC = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
                             onClick={() => setSelectedJob(null)}
                         />
 
@@ -622,7 +740,7 @@ const ExploreJobs: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-2xl max-h-[90vh] z-50 overflow-auto"
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-2xl max-h-[90vh] z-[101] overflow-auto"
                         >
                             <div className="rounded-2xl bg-white border-2 border-neutral-200 shadow-2xl overflow-hidden">
                                 {/* Close Button */}
@@ -692,35 +810,83 @@ const ExploreJobs: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Map Preview */}
+                                    {/* Map Preview - Expandable Card */}
                                     <div>
                                         <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Job Location</h4>
-                                        <div className="h-48 rounded-xl overflow-hidden border border-neutral-200">
-                                            <MapComponent
-                                                center={selectedJob.coordinates}
-                                                zoom={15}
-                                                markers={[
-                                                    { position: selectedJob.coordinates, title: selectedJob.title }
-                                                ]}
-                                            />
-                                        </div>
+                                        <LocationMap
+                                            location={selectedJob.address}
+                                            coordinates={`${selectedJob.coordinates[0].toFixed(4)}° N, ${selectedJob.coordinates[1].toFixed(4)}° E`}
+                                            isDark={false}
+                                        />
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="flex gap-3 pt-4">
-                                        <a
-                                            href={`tel:+919876543210`}
-                                            className="flex-1 py-3 rounded-lg bg-neutral-200 text-neutral-700 font-semibold text-sm hover:bg-neutral-300 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <Phone size={16} />
-                                            Call Employer
-                                        </a>
+                                    <div className="flex flex-col gap-3 pt-4">
+                                        <div className="flex gap-3">
+                                            <a
+                                                href={`tel:+919876543210`}
+                                                className="flex-1 py-3 rounded-lg bg-neutral-200 text-neutral-700 font-semibold text-sm hover:bg-neutral-300 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <Phone size={16} />
+                                                Call Employer
+                                            </a>
+                                            <button
+                                                className="flex-1 py-3 rounded-lg border-2 border-amber-500 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors"
+                                            >
+                                                💬 Negotiate Price
+                                            </button>
+                                        </div>
                                         <button
-                                            className="flex-1 py-3 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors"
+                                            className="w-full py-3 rounded-lg bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-700 transition-colors"
                                         >
                                             Accept Job
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
+            {/* Location Permission Modal */}
+            <AnimatePresence>
+                {showLocationPermission && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
+                            onClick={() => setShowLocationPermission(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-white rounded-2xl shadow-2xl z-[101] p-6"
+                        >
+                            <div className="text-center">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                                    <Navigation size={32} className="text-emerald-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-neutral-800 mb-2">Allow Location Access</h3>
+                                <p className="text-neutral-600 mb-6">
+                                    To find jobs near you, we need access to your location. Your location will be used to show nearby job opportunities and calculate distances.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowLocationPermission(false)}
+                                        className="flex-1 py-3 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={startExploring}
+                                        className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors"
+                                    >
+                                        Allow & Start
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>

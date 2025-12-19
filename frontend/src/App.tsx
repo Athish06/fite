@@ -1,23 +1,29 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './layouts/Layout';
-// Import pages
-import LoginSignup from './pages/LoginSignup';
+
+// Auth pages
+import LoginSignup from './pages/auth/LoginSignup';
+
+// Shared pages
 import Home from './pages/Home';
-import MapWorker from './pages/MapWorker';
-import LongTermJobSeekerBoard from './pages/LongTermJobSeekerBoard';
-import LongTermDashboard from './pages/LongTermDashboard';
-import MyApplications from './pages/MyApplications';
-import ChatInbox from './pages/ChatInbox';
 import UserSettings from './pages/UserSettings';
-import PostedJobs from './pages/PostedJobs';
-import AppliedJobs from './pages/AppliedJobs';
-import JobResponses from './pages/JobResponses';
-import JobDetail from './pages/JobDetail';
-import PostDailyJob from './pages/PostDailyJob';
-import PostLongTermJob from './pages/PostLongTermJob';
-import Applicants from './pages/Applicants';
-import ExploreJobs from './pages/ExploreJobs';
+
+// Posted Jobs pages
+import PostedJobs from './pages/posted-jobs/PostedJobs';
+import JobDetail from './pages/posted-jobs/JobDetail';
+import Applicants from './pages/posted-jobs/Applicants';
+import PostDailyJob from './pages/posted-jobs/PostDailyJob';
+import PostLongTermJob from './pages/posted-jobs/PostLongTermJob';
+
+// Applied Jobs pages
+import AppliedJobs from './pages/applied-jobs/AppliedJobs';
+
+// Explore Jobs pages
+import ExploreJobs from './pages/explore-jobs/ExploreJobs';
+
+// Job Responses pages
+import JobResponses from './pages/job-responses/JobResponses';
 
 import { ModeProvider } from './context/ModeContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -40,16 +46,7 @@ const App: React.FC = () => {
               <Route path="post-long-term-job" element={<PostLongTermJob />} />
               <Route path="applied-jobs" element={<AppliedJobs />} />
               <Route path="explore-jobs" element={<ExploreJobs />} />
-              <Route path="chat-inbox" element={<ChatInbox />} />
-              <Route path="chat" element={<ChatInbox />} />
               <Route path="settings" element={<UserSettings />} />
-
-              {/* Legacy routes */}
-              <Route path="map" element={<MapWorker />} />
-              <Route path="profile" element={<UserSettings />} />
-              <Route path="jobs" element={<LongTermJobSeekerBoard />} />
-              <Route path="dashboard" element={<LongTermDashboard />} />
-              <Route path="applications" element={<MyApplications />} />
             </Route>
           </Routes>
         </Router>

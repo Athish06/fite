@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Phone, Mail, MapPin, Star, Calendar, Briefcase, Download, X, FileText, LayoutGrid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import TextType from '../components/ui/TextType';
-import { useTheme } from '../context/ThemeContext';
-import { useMode } from '../context/ModeContext';
-import PixelBlast from '../components/PixelBlast';
+import TextType from '../../components/ui/TextType';
+import { useTheme } from '../../context/ThemeContext';
+import { useMode } from '../../context/ModeContext';
+import PixelBlast from '../../components/shared/PixelBlast';
 
 interface Applicant {
     id: number;

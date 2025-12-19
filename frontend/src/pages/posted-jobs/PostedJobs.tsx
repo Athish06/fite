@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useMode } from '../context/ModeContext';
+import { useMode } from '../../context/ModeContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, List, Plus, MapPin, Clock, IndianRupee, Users, X, ChevronRight, ChevronDown, Search, Navigation } from 'lucide-react';
-import TextType from '../components/ui/TextType';
-import { useTheme } from '../context/ThemeContext';
-import PixelBlast from '../components/PixelBlast';
+import { LayoutGrid, List, Plus, MapPin, Clock, IndianRupee, Users, X, ChevronRight, ChevronDown, Search } from 'lucide-react';
+import TextType from '../../components/ui/TextType';
+import { useTheme } from '../../context/ThemeContext';
 
 // Slide-Over Drawer Component
 interface PostJobDrawerProps {
@@ -105,57 +104,52 @@ const Sparkline: React.FC<{ trend: 'up' | 'down' | 'stable' }> = ({ trend }) => 
     return (<svg width="48" height="20" viewBox="0 0 48 20" className="opacity-60"><path d={paths[trend]} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 };
 
-// Filter Sidebar Component
+// Filter Sidebar Component - Simplified for Posted Jobs
 interface FilterSidebarProps {
     isDark: boolean;
     isDaily: boolean;
     categoryFilter: string;
     setCategoryFilter: (v: string) => void;
-    distanceFilter: string;
-    setDistanceFilter: (v: string) => void;
-    customDistance: string;
-    setCustomDistance: (v: string) => void;
-    priceMin: string;
-    setPriceMin: (v: string) => void;
-    priceMax: string;
-    setPriceMax: (v: string) => void;
+    statusFilter: string;
+    setStatusFilter: (v: string) => void;
 }
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDark, isDaily, categoryFilter, setCategoryFilter, distanceFilter, setDistanceFilter, customDistance, setCustomDistance, priceMin, setPriceMin, priceMax, setPriceMax }) => {
-    const [expandedSections, setExpandedSections] = useState({ category: false, distance: false, price: false });
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDark, isDaily, categoryFilter, setCategoryFilter, statusFilter, setStatusFilter }) => {
+    const [expandedSections, setExpandedSections] = useState({ category: true, status: true });
     const toggleSection = (section: keyof typeof expandedSections) => setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
     const filterBtnClass = (active: boolean) => `w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${active ? isDark ? 'bg-white text-black' : 'bg-black text-white' : isDark ? 'text-neutral-400 hover:bg-white/10 hover:text-white' : 'text-neutral-600 hover:bg-neutral-100 hover:text-black'}`;
     const categories = isDaily ? ['All', 'Plumbing', 'Electrical', 'Painting', 'Cleaning', 'Moving & Labor', 'Event Helper'] : ['All', 'Full-time', 'Part-time', 'Internship', 'Contract', 'Freelance'];
+    const statuses = ['All', 'Active', 'Ongoing', 'Completed'];
     const sectionHeaderClass = `flex items-center justify-between w-full py-3 px-3 rounded-xl cursor-pointer transition-all ${isDark ? 'bg-white/5 hover:bg-white/10 border border-white/10' : 'bg-neutral-100 hover:bg-neutral-200 border border-neutral-200'}`;
 
     return (
-        <div className={`w-64 shrink-0 rounded-2xl p-4 h-fit sticky top-24 transition-colors ${isDark ? 'bg-white/[0.02] border border-white/10' : 'bg-white border border-neutral-200 shadow-md'}`}>
-            <div className="mb-5">
-                <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-colors ${isDark ? 'bg-white/5 border-white/10' : 'bg-neutral-50 border-neutral-200'}`}>
+        <div
+            className={`w-56 shrink-0 rounded-xl p-4 h-fit sticky top-24 transition-colors ${isDark ? 'bg-white/[0.02] border border-white/10' : 'bg-white/60 border border-neutral-300/80 backdrop-blur-sm'}`}
+            style={!isDark ? { boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' } : {}}
+        >
+            <div className="mb-4">
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/60 border-neutral-200'}`}>
                     <Search size={16} className={isDark ? 'text-neutral-500' : 'text-neutral-400'} />
                     <input type="text" placeholder="Search jobs..." className={`bg-transparent text-sm w-full outline-none placeholder:text-neutral-500 ${isDark ? 'text-white' : 'text-black'}`} />
                 </div>
             </div>
+
+            {/* Status Filter */}
             <div className="mb-3">
+                <button onClick={() => toggleSection('status')} className={sectionHeaderClass}>
+                    <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Status</span>
+                    <ChevronDown size={16} className={`transition-transform ${expandedSections.status ? 'rotate-180' : ''} ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
+                </button>
+                <AnimatePresence>{expandedSections.status && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="pt-2 space-y-1">{statuses.map((status) => (<button key={status} onClick={() => setStatusFilter(status.toLowerCase())} className={filterBtnClass(statusFilter === status.toLowerCase())}>{status}</button>))}</div></motion.div>)}</AnimatePresence>
+            </div>
+
+            {/* Category Filter */}
+            <div>
                 <button onClick={() => toggleSection('category')} className={sectionHeaderClass}>
                     <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Category</span>
                     <ChevronDown size={16} className={`transition-transform ${expandedSections.category ? 'rotate-180' : ''} ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
                 </button>
                 <AnimatePresence>{expandedSections.category && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="pt-2 space-y-1">{categories.map((cat) => (<button key={cat} onClick={() => setCategoryFilter(cat.toLowerCase())} className={filterBtnClass(categoryFilter === cat.toLowerCase())}>{cat}</button>))}</div></motion.div>)}</AnimatePresence>
-            </div>
-            <div className="mb-3">
-                <button onClick={() => toggleSection('distance')} className={sectionHeaderClass}>
-                    <span className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}><Navigation size={14} />Distance</span>
-                    <ChevronDown size={16} className={`transition-transform ${expandedSections.distance ? 'rotate-180' : ''} ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
-                </button>
-                <AnimatePresence>{expandedSections.distance && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="pt-2 space-y-1"><button onClick={() => setDistanceFilter('all')} className={filterBtnClass(distanceFilter === 'all')}>Any Distance</button><button onClick={() => setDistanceFilter('5')} className={filterBtnClass(distanceFilter === '5')}>Within 5 km</button><button onClick={() => setDistanceFilter('10')} className={filterBtnClass(distanceFilter === '10')}>Within 10 km</button><button onClick={() => setDistanceFilter('20')} className={filterBtnClass(distanceFilter === '20')}>Within 20 km</button><div className="pt-2"><div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${isDark ? 'bg-white/5 border-white/10' : 'bg-neutral-50 border-neutral-200'}`}><input type="number" placeholder="Custom" value={customDistance} onChange={(e) => { setCustomDistance(e.target.value); if (e.target.value) setDistanceFilter('custom'); }} className={`bg-transparent text-sm w-full outline-none placeholder:text-neutral-500 ${isDark ? 'text-white' : 'text-black'}`} /><span className={`text-xs font-medium ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>km</span></div></div></div></motion.div>)}</AnimatePresence>
-            </div>
-            <div className="mb-3">
-                <button onClick={() => toggleSection('price')} className={sectionHeaderClass}>
-                    <span className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}><IndianRupee size={14} />Price Range</span>
-                    <ChevronDown size={16} className={`transition-transform ${expandedSections.price ? 'rotate-180' : ''} ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
-                </button>
-                <AnimatePresence>{expandedSections.price && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="pt-3 space-y-3"><div className="flex gap-2"><div className={`flex-1 flex items-center gap-1 px-3 py-2 rounded-lg border ${isDark ? 'bg-white/5 border-white/10' : 'bg-neutral-50 border-neutral-200'}`}><span className={`text-xs ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>₹</span><input type="number" placeholder="Min" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className={`bg-transparent text-sm w-full outline-none placeholder:text-neutral-500 ${isDark ? 'text-white' : 'text-black'}`} /></div><span className={`self-center text-sm ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>-</span><div className={`flex-1 flex items-center gap-1 px-3 py-2 rounded-lg border ${isDark ? 'bg-white/5 border-white/10' : 'bg-neutral-50 border-neutral-200'}`}><span className={`text-xs ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>₹</span><input type="number" placeholder="Max" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className={`bg-transparent text-sm w-full outline-none placeholder:text-neutral-500 ${isDark ? 'text-white' : 'text-black'}`} /></div></div><div className="flex flex-wrap gap-1.5">{isDaily ? (<><button onClick={() => { setPriceMin('500'); setPriceMax('800'); }} className={`px-2.5 py-1 text-xs rounded-md font-medium ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-100 text-black hover:bg-neutral-200'}`}>₹500-800</button><button onClick={() => { setPriceMin('800'); setPriceMax('1200'); }} className={`px-2.5 py-1 text-xs rounded-md font-medium ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-100 text-black hover:bg-neutral-200'}`}>₹800-1.2k</button><button onClick={() => { setPriceMin('1200'); setPriceMax(''); }} className={`px-2.5 py-1 text-xs rounded-md font-medium ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-100 text-black hover:bg-neutral-200'}`}>₹1.2k+</button></>) : (<><button onClick={() => { setPriceMin('300000'); setPriceMax('600000'); }} className={`px-2.5 py-1 text-xs rounded-md font-medium ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-100 text-black hover:bg-neutral-200'}`}>3-6 LPA</button><button onClick={() => { setPriceMin('600000'); setPriceMax('1200000'); }} className={`px-2.5 py-1 text-xs rounded-md font-medium ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-100 text-black hover:bg-neutral-200'}`}>6-12 LPA</button><button onClick={() => { setPriceMin('1200000'); setPriceMax(''); }} className={`px-2.5 py-1 text-xs rounded-md font-medium ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-neutral-100 text-black hover:bg-neutral-200'}`}>12+ LPA</button></>)}</div></div></motion.div>)}</AnimatePresence>
             </div>
         </div>
     );
@@ -168,10 +162,7 @@ const PostedJobs: React.FC = () => {
     const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState('all');
-    const [distanceFilter, setDistanceFilter] = useState('all');
-    const [customDistance, setCustomDistance] = useState('');
-    const [priceMin, setPriceMin] = useState('');
-    const [priceMax, setPriceMax] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     const isDaily = mode === 'daily';
 
@@ -198,20 +189,83 @@ const PostedJobs: React.FC = () => {
     };
 
     return (
-        <div className={`w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8 transition-colors duration-500 ${isDark ? 'bg-[#09090b]' : 'bg-[#F5F8FA]'}`}>
-            {/* PixelBlast Background */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <PixelBlast variant="circle" pixelSize={5} color={isDaily ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f59e0b' : '#d97706')} patternScale={2.5} patternDensity={isDark ? 0.6 : 0.8} pixelSizeJitter={0.4} enableRipples rippleSpeed={0.3} rippleThickness={0.1} rippleIntensityScale={1.2} liquid={false} speed={0.2} edgeFade={0.3} transparent />
-                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-b from-[#09090b]/70 via-[#09090b]/50 to-[#09090b]/80' : 'bg-gradient-to-b from-[#F5F8FA]/80 via-[#F5F8FA]/60 to-[#F5F8FA]/90'}`} />
+        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
+            {/* Background Pattern - Watercolor Paper Texture like AppliedJobs */}
+            <div
+                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
+                style={{
+                    left: 0,
+                    right: 0,
+                    backgroundColor: isDark ? '#09090b' : (isDaily ? '#F5F9F7' : '#FAF8F5')
+                }}
+            >
+                {/* Grainy Paper Texture */}
+                {!isDark && (
+                    <div
+                        className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
+                        style={{ filter: 'contrast(110%) brightness(100%)' }}
+                    />
+                )}
+
+                {/* Organic Watercolor Gradients */}
+                {!isDark && (isDaily ? (
+                    <>
+                        <div
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
+                            style={{
+                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
+                                filter: 'blur(60px)'
+                            }}
+                        />
+                        <div
+                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
+                            style={{
+                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
+                                filter: 'blur(80px)'
+                            }}
+                        />
+                        <div
+                            className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
+                            style={{
+                                background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
+                                filter: 'blur(70px)'
+                            }}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <div
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
+                            style={{
+                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
+                                filter: 'blur(60px)'
+                            }}
+                        />
+                        <div
+                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
+                            style={{
+                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
+                                filter: 'blur(80px)'
+                            }}
+                        />
+                        <div
+                            className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
+                            style={{
+                                background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
+                                filter: 'blur(70px)'
+                            }}
+                        />
+                    </>
+                ))}
             </div>
 
             {/* Header */}
-            <div className="relative z-10 flex items-center justify-between mb-10">
+            <div className="relative z-10 flex items-center justify-between mb-8">
                 <div>
-                    <h1 className={`text-4xl md:text-5xl font-black tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
+                    <h1 className={`text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-neutral-800'}`}>
                         <TextType text="Posted Jobs" typingSpeed={80} loop={false} showCursor={false} />
                     </h1>
-                    <p className={`text-base mt-3 font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                         {isDaily ? "Manage your daily wage listings" : "Track your long-term job postings"}
                     </p>
                 </div>
@@ -253,7 +307,7 @@ const PostedJobs: React.FC = () => {
 
             {/* Main Content */}
             <div className="relative z-10 flex gap-8">
-                <FilterSidebar isDark={isDark} isDaily={isDaily} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} distanceFilter={distanceFilter} setDistanceFilter={setDistanceFilter} customDistance={customDistance} setCustomDistance={setCustomDistance} priceMin={priceMin} setPriceMin={setPriceMin} priceMax={priceMax} setPriceMax={setPriceMax} />
+                <FilterSidebar isDark={isDark} isDaily={isDaily} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
 
                 <div className="flex-1 min-w-0">
                     <AnimatePresence mode="wait">
@@ -269,7 +323,7 @@ const PostedJobs: React.FC = () => {
                                         className={`group relative cursor-pointer p-6 pl-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 ${isDark ? 'bg-white/[0.04] border border-white/10 hover:border-white/20' : 'bg-white border border-neutral-200 hover:shadow-lg'}`}
                                     >
                                         {/* Left accent line */}
-                                        <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
+                                        <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${isDark ? 'bg-white' : 'bg-neutral-800'}`} />
                                         <div className="flex items-start justify-between mb-6">
                                             <div>
                                                 <h3 className={`text-lg font-bold leading-tight mb-1.5 ${isDark ? 'text-white' : 'text-black'}`}>{job.title}</h3>
@@ -312,7 +366,7 @@ const PostedJobs: React.FC = () => {
                                 {currentJobs.map((job, index) => (
                                     <motion.div key={job.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }} onClick={() => handleJobClick(job.id)} className={`group relative grid grid-cols-12 gap-4 items-center cursor-pointer pl-8 pr-6 py-5 rounded-xl transition-all duration-200 ${isDark ? 'bg-white/[0.04] border border-white/10 hover:border-white/20' : 'bg-white border border-neutral-200 hover:shadow-md'}`}>
                                         {/* Left accent line */}
-                                        <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
+                                        <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${isDark ? 'bg-white' : 'bg-neutral-800'}`} />
                                         <div className="col-span-4 flex items-center gap-4">
                                             <div className={`w-2.5 h-2.5 rounded-full ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                                             <div>

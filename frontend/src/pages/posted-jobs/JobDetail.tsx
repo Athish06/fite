@@ -18,11 +18,10 @@ import {
     Plus,
     Minus,
 } from 'lucide-react';
-import { LocationMap } from '../components/ui/expand-map';
-import { EncryptedText } from '../components/ui/encrypted-text';
-import { useTheme } from '../context/ThemeContext';
-import { useMode } from '../context/ModeContext';
-import PixelBlast from '../components/PixelBlast';
+import { LocationMap } from '../../components/ui/expand-map';
+import { EncryptedText } from '../../components/ui/encrypted-text';
+import { useTheme } from '../../context/ThemeContext';
+import { useMode } from '../../context/ModeContext';
 
 interface Worker {
     id: number;
@@ -95,25 +94,75 @@ const JobDetail: React.FC = () => {
 
     return (
         <div className={`w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8 transition-colors duration-500 ${isDark ? 'bg-[#09090b]' : 'bg-[#F5F8FA]'}`}>
-            {/* PixelBlast Background - Same as PostedJobs */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <PixelBlast
-                    variant="circle"
-                    pixelSize={5}
-                    color={isDaily ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f59e0b' : '#d97706')}
-                    patternScale={2.5}
-                    patternDensity={isDark ? 0.6 : 0.8}
-                    pixelSizeJitter={0.4}
-                    enableRipples
-                    rippleSpeed={0.3}
-                    rippleThickness={0.1}
-                    rippleIntensityScale={1.2}
-                    liquid={false}
-                    speed={0.2}
-                    edgeFade={0.3}
-                    transparent
-                />
-                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-b from-[#09090b]/70 via-[#09090b]/50 to-[#09090b]/80' : 'bg-gradient-to-b from-[#F5F8FA]/80 via-[#F5F8FA]/60 to-[#F5F8FA]/90'}`} />
+            {/* Background Pattern - Watercolor Paper Texture */}
+            <div
+                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
+                style={{
+                    left: 0,
+                    right: 0,
+                    backgroundColor: isDark ? '#09090b' : (isDaily ? '#F5F9F7' : '#FAF8F5')
+                }}
+            >
+                {!isDark && (
+                    <>
+                        {/* Grainy Paper Texture */}
+                        <div
+                            className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
+                            style={{ filter: 'contrast(110%) brightness(100%)' }}
+                        />
+
+                        {/* Organic Watercolor Gradients */}
+                        {isDaily ? (
+                            <>
+                                <div
+                                    className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
+                                    style={{
+                                        background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
+                                        filter: 'blur(60px)'
+                                    }}
+                                />
+                                <div
+                                    className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
+                                    style={{
+                                        background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
+                                        filter: 'blur(80px)'
+                                    }}
+                                />
+                                <div
+                                    className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
+                                    style={{
+                                        background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
+                                        filter: 'blur(70px)'
+                                    }}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <div
+                                    className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
+                                    style={{
+                                        background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
+                                        filter: 'blur(60px)'
+                                    }}
+                                />
+                                <div
+                                    className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
+                                    style={{
+                                        background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
+                                        filter: 'blur(80px)'
+                                    }}
+                                />
+                                <div
+                                    className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
+                                    style={{
+                                        background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
+                                        filter: 'blur(70px)'
+                                    }}
+                                />
+                            </>
+                        )}
+                    </>
+                )}
             </div>
 
             {/* Header */}

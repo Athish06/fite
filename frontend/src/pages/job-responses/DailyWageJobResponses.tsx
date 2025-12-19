@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, IndianRupee, Clock, Phone, Navigation, Plus, Minus, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import JobMap from '../components/JobMap';
+import JobMap from '../../components/shared/JobMap';
 
 type JobStatus = 'searching' | 'negotiating' | 'confirmed' | 'in-progress';
 
