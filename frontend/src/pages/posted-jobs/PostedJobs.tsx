@@ -3,8 +3,6 @@ import { useMode } from '../../context/ModeContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, List, Plus, MapPin, Clock, IndianRupee, Users, X, ChevronRight, ChevronDown, Search } from 'lucide-react';
-import TextType from '../../components/ui/TextType';
-import { useTheme } from '../../context/ThemeContext';
 
 // Slide-Over Drawer Component
 interface PostJobDrawerProps {
@@ -106,7 +104,6 @@ const Sparkline: React.FC<{ trend: 'up' | 'down' | 'stable' }> = ({ trend }) => 
 
 // Filter Sidebar Component - Simplified for Posted Jobs
 interface FilterSidebarProps {
-    isDark: boolean;
     isDaily: boolean;
     categoryFilter: string;
     setCategoryFilter: (v: string) => void;
@@ -114,31 +111,31 @@ interface FilterSidebarProps {
     setStatusFilter: (v: string) => void;
 }
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDark, isDaily, categoryFilter, setCategoryFilter, statusFilter, setStatusFilter }) => {
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDaily, categoryFilter, setCategoryFilter, statusFilter, setStatusFilter }) => {
     const [expandedSections, setExpandedSections] = useState({ category: true, status: true });
     const toggleSection = (section: keyof typeof expandedSections) => setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-    const filterBtnClass = (active: boolean) => `w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${active ? isDark ? 'bg-white text-black' : 'bg-black text-white' : isDark ? 'text-neutral-400 hover:bg-white/10 hover:text-white' : 'text-neutral-600 hover:bg-neutral-100 hover:text-black'}`;
+    const filterBtnClass = (active: boolean) => `w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${active ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'}`;
     const categories = isDaily ? ['All', 'Plumbing', 'Electrical', 'Painting', 'Cleaning', 'Moving & Labor', 'Event Helper'] : ['All', 'Full-time', 'Part-time', 'Internship', 'Contract', 'Freelance'];
     const statuses = ['All', 'Active', 'Ongoing', 'Completed'];
-    const sectionHeaderClass = `flex items-center justify-between w-full py-3 px-3 rounded-xl cursor-pointer transition-all ${isDark ? 'bg-white/5 hover:bg-white/10 border border-white/10' : 'bg-neutral-100 hover:bg-neutral-200 border border-neutral-200'}`;
+    const sectionHeaderClass = 'flex items-center justify-between w-full py-3 px-4 rounded-xl cursor-pointer transition-all bg-neutral-50 hover:bg-neutral-100 border border-neutral-200';
 
     return (
         <div
-            className={`w-56 shrink-0 rounded-xl p-4 h-fit sticky top-24 transition-colors ${isDark ? 'bg-white/[0.02] border border-white/10' : 'bg-white/60 border border-neutral-300/80 backdrop-blur-sm'}`}
-            style={!isDark ? { boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' } : {}}
+            className="w-60 shrink-0 rounded-2xl p-5 h-fit sticky top-24 bg-white border-2 border-neutral-200"
+            style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
         >
-            <div className="mb-4">
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/60 border-neutral-200'}`}>
-                    <Search size={16} className={isDark ? 'text-neutral-500' : 'text-neutral-400'} />
-                    <input type="text" placeholder="Search jobs..." className={`bg-transparent text-sm w-full outline-none placeholder:text-neutral-500 ${isDark ? 'text-white' : 'text-black'}`} />
+            <div className="mb-5">
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-neutral-200 bg-neutral-50">
+                    <Search size={16} className="text-neutral-400" />
+                    <input type="text" placeholder="Search jobs..." className="bg-transparent text-sm w-full outline-none placeholder:text-neutral-400 text-neutral-900 font-medium" />
                 </div>
             </div>
 
             {/* Status Filter */}
-            <div className="mb-3">
+            <div className="mb-4">
                 <button onClick={() => toggleSection('status')} className={sectionHeaderClass}>
-                    <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Status</span>
-                    <ChevronDown size={16} className={`transition-transform ${expandedSections.status ? 'rotate-180' : ''} ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
+                    <span className="text-sm font-bold text-neutral-900">Status</span>
+                    <ChevronDown size={16} className={`transition-transform ${expandedSections.status ? 'rotate-180' : ''} text-neutral-500`} />
                 </button>
                 <AnimatePresence>{expandedSections.status && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="pt-2 space-y-1">{statuses.map((status) => (<button key={status} onClick={() => setStatusFilter(status.toLowerCase())} className={filterBtnClass(statusFilter === status.toLowerCase())}>{status}</button>))}</div></motion.div>)}</AnimatePresence>
             </div>
@@ -146,8 +143,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDark, isDaily, category
             {/* Category Filter */}
             <div>
                 <button onClick={() => toggleSection('category')} className={sectionHeaderClass}>
-                    <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Category</span>
-                    <ChevronDown size={16} className={`transition-transform ${expandedSections.category ? 'rotate-180' : ''} ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
+                    <span className="text-sm font-bold text-neutral-900">Category</span>
+                    <ChevronDown size={16} className={`transition-transform ${expandedSections.category ? 'rotate-180' : ''} text-neutral-500`} />
                 </button>
                 <AnimatePresence>{expandedSections.category && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden"><div className="pt-2 space-y-1">{categories.map((cat) => (<button key={cat} onClick={() => setCategoryFilter(cat.toLowerCase())} className={filterBtnClass(categoryFilter === cat.toLowerCase())}>{cat}</button>))}</div></motion.div>)}</AnimatePresence>
             </div>
@@ -157,7 +154,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDark, isDaily, category
 
 const PostedJobs: React.FC = () => {
     const { mode } = useMode();
-    const { isDark } = useTheme();
     const navigate = useNavigate();
     const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -190,105 +186,89 @@ const PostedJobs: React.FC = () => {
 
     return (
         <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Watercolor Paper Texture like AppliedJobs */}
+            {/* Background Pattern - Subtle Paper Texture */}
             <div
                 className="fixed inset-0 pointer-events-none overflow-hidden z-0"
                 style={{
                     left: 0,
                     right: 0,
-                    backgroundColor: isDark ? '#09090b' : (isDaily ? '#F5F9F7' : '#FAF8F5')
+                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
                 }}
             >
                 {/* Grainy Paper Texture */}
-                {!isDark && (
-                    <div
-                        className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
-                        style={{ filter: 'contrast(110%) brightness(100%)' }}
-                    />
-                )}
+                <div
+                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.08] mix-blend-multiply"
+                    style={{ filter: 'contrast(110%) brightness(100%)' }}
+                />
 
                 {/* Organic Watercolor Gradients */}
-                {!isDark && (isDaily ? (
+                {isDaily ? (
                     <>
                         <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, rgba(187, 247, 208, 0.2) 40%, transparent 70%)',
                                 filter: 'blur(60px)'
                             }}
                         />
                         <div
-                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
+                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-25"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.4) 0%, rgba(209, 250, 229, 0.2) 50%, transparent 70%)',
                                 filter: 'blur(80px)'
-                            }}
-                        />
-                        <div
-                            className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
-                                filter: 'blur(70px)'
                             }}
                         />
                     </>
                 ) : (
                     <>
                         <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-35"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.5) 0%, rgba(254, 215, 170, 0.3) 40%, transparent 70%)',
                                 filter: 'blur(60px)'
                             }}
                         />
                         <div
-                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
+                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-30"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.5) 0%, rgba(253, 230, 188, 0.3) 50%, transparent 70%)',
                                 filter: 'blur(80px)'
                             }}
                         />
-                        <div
-                            className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
-                                filter: 'blur(70px)'
-                            }}
-                        />
                     </>
-                ))}
+                )}
             </div>
 
             {/* Header */}
             <div className="relative z-10 flex items-center justify-between mb-8">
                 <div>
-                    <h1 className={`text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-neutral-800'}`}>
-                        <TextType text="Posted Jobs" typingSpeed={80} loop={false} showCursor={false} />
+                    <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
+                        Posted Jobs
                     </h1>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                    <p className="text-sm mt-1 text-neutral-500 font-medium">
                         {isDaily ? "Manage your daily wage listings" : "Track your long-term job postings"}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4">
                     {/* View Toggle - Icons with proper boundaries */}
-                    <div className={`relative flex items-center p-1.5 rounded-xl overflow-hidden ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`}>
+                    <div className="relative flex items-center p-1.5 rounded-xl overflow-hidden bg-neutral-200">
                         <motion.div
                             layoutId="viewTogglePill"
-                            className={`absolute h-9 w-10 rounded-lg ${isDark ? 'bg-white' : 'bg-black'}`}
+                            className="absolute h-9 w-10 rounded-lg bg-neutral-900"
                             initial={false}
                             animate={{ x: viewMode === 'card' ? 0 : 44 }}
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         />
                         <button
                             onClick={() => setViewMode('card')}
-                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'card' ? isDark ? 'text-black' : 'text-white' : isDark ? 'text-neutral-400' : 'text-neutral-600'}`}
+                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'card' ? 'text-white' : 'text-neutral-600'}`}
                         >
                             <LayoutGrid size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? isDark ? 'text-black' : 'text-white' : isDark ? 'text-neutral-400' : 'text-neutral-600'}`}
+                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'text-white' : 'text-neutral-600'}`}
                         >
                             <List size={18} />
                         </button>
@@ -297,7 +277,7 @@ const PostedJobs: React.FC = () => {
                     {/* Post Button */}
                     <button
                         onClick={() => setIsDrawerOpen(true)}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 ${isDark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-black text-white hover:bg-neutral-800'}`}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm active:scale-95 bg-neutral-900 text-white hover:bg-neutral-800"
                     >
                         <Plus size={18} />
                         Post Job
@@ -307,7 +287,7 @@ const PostedJobs: React.FC = () => {
 
             {/* Main Content */}
             <div className="relative z-10 flex gap-8">
-                <FilterSidebar isDark={isDark} isDaily={isDaily} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+                <FilterSidebar isDaily={isDaily} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
 
                 <div className="flex-1 min-w-0">
                     <AnimatePresence mode="wait">
@@ -320,43 +300,43 @@ const PostedJobs: React.FC = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.05 }}
                                         onClick={() => handleJobClick(job.id)}
-                                        className={`group relative cursor-pointer p-6 pl-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 ${isDark ? 'bg-white/[0.04] border border-white/10 hover:border-white/20' : 'bg-white border border-neutral-200 hover:shadow-lg'}`}
+                                        className="group relative cursor-pointer p-6 pl-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 bg-white border-2 border-neutral-200 hover:border-neutral-300 hover:shadow-lg"
                                     >
                                         {/* Left accent line */}
-                                        <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${isDark ? 'bg-white' : 'bg-neutral-800'}`} />
+                                        <div className="absolute left-0 top-4 bottom-4 w-1 rounded-full bg-neutral-800" />
                                         <div className="flex items-start justify-between mb-6">
                                             <div>
-                                                <h3 className={`text-lg font-bold leading-tight mb-1.5 ${isDark ? 'text-white' : 'text-black'}`}>{job.title}</h3>
-                                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wide ${isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'}`}>{job.status}</span>
+                                                <h3 className="text-lg font-bold leading-tight mb-1.5 text-neutral-900">{job.title}</h3>
+                                                <span className="text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide bg-emerald-100 text-emerald-700">{job.status}</span>
                                             </div>
                                         </div>
                                         <div className="space-y-3 mb-6">
-                                            <div className={`flex items-center gap-3 text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                                            <div className="flex items-center gap-3 text-sm font-medium text-neutral-600">
                                                 <MapPin size={16} className="opacity-70" /><span>{job.location}</span>
                                             </div>
-                                            <div className={`flex items-center gap-3 text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
-                                                <IndianRupee size={16} className="opacity-70" /><span className="font-bold">{job.pay}</span>
+                                            <div className="flex items-center gap-3 text-sm font-medium text-neutral-600">
+                                                <IndianRupee size={16} className="opacity-70" /><span className="font-bold text-neutral-900">{job.pay}</span>
                                             </div>
                                             {isDaily && 'time' in job && (
-                                                <div className={`flex items-center gap-3 text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                                                <div className="flex items-center gap-3 text-sm font-medium text-neutral-600">
                                                     <Clock size={16} className="opacity-70" /><span>{job.time}</span>
                                                 </div>
                                             )}
                                         </div>
-                                        <div className={`pt-4 border-t flex items-center justify-between ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+                                        <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <Users size={16} className={isDark ? 'text-neutral-400' : 'text-neutral-500'} />
-                                                <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{job.applicants} Applicants</span>
+                                                <Users size={16} className="text-neutral-500" />
+                                                <span className="text-sm font-bold text-neutral-900">{job.applicants} Applicants</span>
                                                 <div className={`scale-75 origin-left ${isDaily ? 'text-emerald-500' : 'text-amber-500'}`}><Sparkline trend={job.trend} /></div>
                                             </div>
-                                            <span className={`text-xs font-medium ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>{job.postedAt}</span>
+                                            <span className="text-xs font-medium text-neutral-400">{job.postedAt}</span>
                                         </div>
                                     </motion.div>
                                 ))}
                             </motion.div>
                         ) : (
                             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
-                                <div className={`grid grid-cols-12 gap-4 px-6 py-3 text-[11px] uppercase tracking-wider font-bold ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                                <div className="grid grid-cols-12 gap-4 px-6 py-3 text-[11px] uppercase tracking-wider font-bold text-neutral-400">
                                     <div className="col-span-4">Job Title</div>
                                     <div className="col-span-3">Location</div>
                                     <div className="col-span-2">Pay</div>
@@ -364,25 +344,25 @@ const PostedJobs: React.FC = () => {
                                     <div className="col-span-1 text-right">Posted</div>
                                 </div>
                                 {currentJobs.map((job, index) => (
-                                    <motion.div key={job.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }} onClick={() => handleJobClick(job.id)} className={`group relative grid grid-cols-12 gap-4 items-center cursor-pointer pl-8 pr-6 py-5 rounded-xl transition-all duration-200 ${isDark ? 'bg-white/[0.04] border border-white/10 hover:border-white/20' : 'bg-white border border-neutral-200 hover:shadow-md'}`}>
+                                    <motion.div key={job.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }} onClick={() => handleJobClick(job.id)} className="group relative grid grid-cols-12 gap-4 items-center cursor-pointer pl-8 pr-6 py-5 rounded-2xl transition-all duration-200 bg-white border-2 border-neutral-200 hover:border-neutral-300 hover:shadow-md">
                                         {/* Left accent line */}
-                                        <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${isDark ? 'bg-white' : 'bg-neutral-800'}`} />
+                                        <div className="absolute left-0 top-3 bottom-3 w-1 rounded-full bg-neutral-800" />
                                         <div className="col-span-4 flex items-center gap-4">
                                             <div className={`w-2.5 h-2.5 rounded-full ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                                             <div>
-                                                <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{job.title}</div>
-                                                <span className={`text-xs font-medium capitalize ${isDark ? 'text-neutral-500' : 'text-neutral-400'}`}>{job.status}</span>
+                                                <div className="text-sm font-bold text-neutral-900">{job.title}</div>
+                                                <span className="text-xs font-medium capitalize text-neutral-400">{job.status}</span>
                                             </div>
                                         </div>
-                                        <div className={`col-span-3 flex items-center gap-2 text-sm font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                                        <div className="col-span-3 flex items-center gap-2 text-sm font-medium text-neutral-600">
                                             <MapPin size={14} className="opacity-70" /><span className="truncate">{job.location}</span>
                                         </div>
-                                        <div className={`col-span-2 text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{job.pay}</div>
+                                        <div className="col-span-2 text-sm font-bold text-neutral-900">{job.pay}</div>
                                         <div className="col-span-2 flex items-center gap-3">
-                                            <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{job.applicants}</span>
+                                            <span className="text-sm font-bold text-neutral-900">{job.applicants}</span>
                                             <div className={`scale-75 origin-left ${isDaily ? 'text-emerald-500' : 'text-amber-500'}`}><Sparkline trend={job.trend} /></div>
                                         </div>
-                                        <div className={`col-span-1 text-xs font-medium text-right ${isDark ? 'text-neutral-600' : 'text-neutral-400'}`}>{job.postedAt}</div>
+                                        <div className="col-span-1 text-xs font-medium text-right text-neutral-400">{job.postedAt}</div>
                                     </motion.div>
                                 ))}
                             </motion.div>

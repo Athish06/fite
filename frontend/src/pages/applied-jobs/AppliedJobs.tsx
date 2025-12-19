@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useMode } from '../../context/ModeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, List, MapPin, Clock, IndianRupee, Star, Calendar, CheckCircle, XCircle, Clock3, ChevronDown } from 'lucide-react';
-import TextType from '../../components/ui/TextType';
 
 type JobStatus = 'completed' | 'selected' | 'rejected' | 'waiting';
 type DateFilter = 'today' | 'yesterday' | 'this-week' | 'this-month' | 'all';
@@ -185,18 +184,18 @@ const AppliedJobs: React.FC = () => {
 
     return (
         <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Watercolor Paper Texture */}
+            {/* Background Pattern - Subtle Paper Texture */}
             <div
                 className="fixed inset-0 pointer-events-none overflow-hidden z-0"
                 style={{
                     left: 0,
                     right: 0,
-                    backgroundColor: isDaily ? '#F5F9F7' : '#FAF8F5'
+                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
                 }}
             >
                 {/* Grainy Paper Texture */}
                 <div
-                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
+                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.08] mix-blend-multiply"
                     style={{ filter: 'contrast(110%) brightness(100%)' }}
                 />
 
@@ -204,48 +203,34 @@ const AppliedJobs: React.FC = () => {
                 {isDaily ? (
                     <>
                         <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, rgba(187, 247, 208, 0.2) 40%, transparent 70%)',
                                 filter: 'blur(60px)'
                             }}
                         />
                         <div
-                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
+                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-25"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.4) 0%, rgba(209, 250, 229, 0.2) 50%, transparent 70%)',
                                 filter: 'blur(80px)'
-                            }}
-                        />
-                        <div
-                            className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
-                                filter: 'blur(70px)'
                             }}
                         />
                     </>
                 ) : (
                     <>
                         <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
+                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-35"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.5) 0%, rgba(254, 215, 170, 0.3) 40%, transparent 70%)',
                                 filter: 'blur(60px)'
                             }}
                         />
                         <div
-                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
+                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-30"
                             style={{
-                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.5) 0%, rgba(253, 230, 188, 0.3) 50%, transparent 70%)',
                                 filter: 'blur(80px)'
-                            }}
-                        />
-                        <div
-                            className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
-                                filter: 'blur(70px)'
                             }}
                         />
                     </>
@@ -254,28 +239,23 @@ const AppliedJobs: React.FC = () => {
 
             {/* Header Toolbar */}
             <div className="relative z-10 flex items-center justify-between mb-8">
-                {/* Left: Title with Typewriter */}
+                {/* Left: Title */}
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-neutral-800">
-                        <TextType
-                            text={isDaily ? "Job History" : "Applications"}
-                            typingSpeed={80}
-                            loop={false}
-                            showCursor={false}
-                        />
+                    <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
+                        {isDaily ? "Job History" : "Applications"}
                     </h1>
-                    <p className="text-sm text-neutral-600 mt-1">
+                    <p className="text-sm text-neutral-500 mt-1 font-medium">
                         {isDaily ? "Your completed jobs and earnings" : "Track your job applications"}
                     </p>
                 </div>
 
                 {/* Right: Control Bar */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     {/* Date Filter Dropdown */}
                     <div className="relative">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-neutral-200 shadow-sm text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
                         >
                             <Calendar size={16} />
                             {dateFilterOptions.find(o => o.value === dateFilter)?.label}
@@ -288,7 +268,7 @@ const AppliedJobs: React.FC = () => {
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
-                                    className="absolute top-full mt-2 right-0 w-44 bg-white rounded-xl border border-neutral-200 shadow-xl overflow-hidden z-20"
+                                    className="absolute top-full mt-2 right-0 w-44 bg-white rounded-2xl border-2 border-neutral-200 shadow-xl overflow-hidden z-20"
                                 >
                                     {dateFilterOptions.map((option) => (
                                         <button
@@ -298,8 +278,8 @@ const AppliedJobs: React.FC = () => {
                                                 setIsFilterOpen(false);
                                             }}
                                             className={`w-full px-4 py-3 text-left text-sm transition-colors ${dateFilter === option.value
-                                                ? 'bg-neutral-900 text-white font-medium'
-                                                : 'text-neutral-700 hover:bg-neutral-100'
+                                                ? 'bg-neutral-900 text-white font-semibold'
+                                                : 'text-neutral-700 hover:bg-neutral-50'
                                                 }`}
                                         >
                                             {option.label}
@@ -311,30 +291,29 @@ const AppliedJobs: React.FC = () => {
                     </div>
 
                     {/* View Switcher - Segmented Control */}
-                    <div className="relative flex items-center p-1 rounded-lg bg-white/60 border border-neutral-300/80 backdrop-blur-sm">
+                    <div className="relative flex items-center p-1.5 rounded-xl bg-neutral-200">
                         <motion.div
                             layoutId="appliedViewToggle"
-                            className="absolute h-8 rounded-md bg-neutral-900 shadow-sm"
+                            className="absolute h-9 w-10 rounded-lg bg-neutral-900"
                             initial={false}
                             animate={{
-                                x: viewMode === 'card' ? 4 : 44,
-                                width: 36
+                                x: viewMode === 'card' ? 0 : 44
                             }}
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         />
                         <button
                             onClick={() => setViewMode('card')}
-                            className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${viewMode === 'card' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'card' ? 'text-white' : 'text-neutral-600'
                                 }`}
                         >
-                            <LayoutGrid size={16} />
+                            <LayoutGrid size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${viewMode === 'list' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                            className={`relative z-10 w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'text-white' : 'text-neutral-600'
                                 }`}
                         >
-                            <List size={16} />
+                            <List size={18} />
                         </button>
                     </div>
                 </div>
