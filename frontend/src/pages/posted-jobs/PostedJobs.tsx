@@ -3,6 +3,7 @@ import { useMode } from '../../context/ModeContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, List, Plus, MapPin, Clock, IndianRupee, Users, X, ChevronRight, ChevronDown, Search } from 'lucide-react';
+import TextType from '../../components/ui/TextType';
 
 // Slide-Over Drawer Component
 interface PostJobDrawerProps {
@@ -39,8 +40,8 @@ const PostJobDrawer: React.FC<PostJobDrawerProps> = ({ isOpen, onClose, mode }) 
         <AnimatePresence>
             {isOpen && (
                 <>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={onClose} />
-                    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} className="fixed right-0 top-0 h-screen w-[500px] max-w-[90vw] bg-[#09090b] border-l border-zinc-800 z-50 flex flex-col">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" onClick={onClose} />
+                    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} className="fixed right-0 top-0 h-screen w-[500px] max-w-[90vw] bg-[#09090b] border-l border-zinc-800 z-[101] flex flex-col">
                         <div className="h-0.5 bg-zinc-800">
                             <motion.div className={`h-full ${isDaily ? 'bg-emerald-500' : 'bg-amber-500'}`} initial={{ width: 0 }} animate={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }} transition={{ duration: 0.3 }} />
                         </div>
@@ -121,8 +122,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ isDaily, categoryFilter, 
 
     return (
         <div
-            className="w-60 shrink-0 rounded-2xl p-5 h-fit sticky top-24 bg-white border-2 border-neutral-200"
-            style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+            className="w-60 shrink-0 rounded-2xl p-5 h-fit sticky top-24 bg-white border-2 border-neutral-200 shadow-sm"
         >
             <div className="mb-5">
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-neutral-200 bg-neutral-50">
@@ -185,65 +185,20 @@ const PostedJobs: React.FC = () => {
     };
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Subtle Paper Texture */}
-            <div
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-                style={{
-                    left: 0,
-                    right: 0,
-                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
-                }}
-            >
-                {/* Grainy Paper Texture */}
-                <div
-                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.08] mix-blend-multiply"
-                    style={{ filter: 'contrast(110%) brightness(100%)' }}
-                />
-
-                {/* Organic Watercolor Gradients */}
-                {isDaily ? (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, rgba(187, 247, 208, 0.2) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-25"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.4) 0%, rgba(209, 250, 229, 0.2) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-35"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.5) 0%, rgba(254, 215, 170, 0.3) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.5) 0%, rgba(253, 230, 188, 0.3) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                    </>
-                )}
-            </div>
+        <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
+            <div className="mx-auto w-full max-w-6xl">
 
             {/* Header */}
-            <div className="relative z-10 flex items-center justify-between mb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
-                        Posted Jobs
+                        <TextType
+                            key="posted-jobs"
+                            text="Posted Jobs"
+                            typingSpeed={80}
+                            loop={false}
+                            showCursor={false}
+                        />
                     </h1>
                     <p className="text-sm mt-1 text-neutral-500 font-medium">
                         {isDaily ? "Manage your daily wage listings" : "Track your long-term job postings"}
@@ -252,7 +207,7 @@ const PostedJobs: React.FC = () => {
 
                 <div className="flex items-center gap-4">
                     {/* View Toggle - Icons with proper boundaries */}
-                    <div className="relative flex items-center p-1.5 rounded-xl overflow-hidden bg-neutral-200">
+                    <div className="relative flex items-center p-1 rounded-xl overflow-hidden bg-neutral-100 border-2 border-neutral-200 shadow-sm">
                         <motion.div
                             layoutId="viewTogglePill"
                             className="absolute h-9 w-10 rounded-lg bg-neutral-900"
@@ -372,6 +327,7 @@ const PostedJobs: React.FC = () => {
             </div>
 
             <PostJobDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} mode={isDaily ? 'daily' : 'longterm'} />
+            </div>
         </div>
     );
 };

@@ -20,31 +20,8 @@ const UserSettings: React.FC = () => {
     ];
 
     return (
-        <div className="w-full min-h-screen relative">
-            {/* Background Pattern - Subtle Paper Texture */}
-            <div
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-                style={{
-                    left: 0,
-                    right: 0,
-                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
-                }}
-            >
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.06] mix-blend-multiply" />
-                {isDaily ? (
-                    <>
-                        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-                        <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[50%] rounded-full opacity-20" style={{ background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.3) 0%, transparent 70%)', filter: 'blur(70px)' }} />
-                    </>
-                ) : (
-                    <>
-                        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30" style={{ background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.4) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-                        <div className="absolute bottom-[-10%] left-[-10%] w-[55%] h-[55%] rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.3) 0%, transparent 70%)', filter: 'blur(70px)' }} />
-                    </>
-                )}
-            </div>
-
-            <div className="relative z-10 px-6 md:px-8 pt-8 pb-8">
+        <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
+            <div className="mx-auto w-full max-w-6xl">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
@@ -63,8 +40,7 @@ const UserSettings: React.FC = () => {
                         className="w-full lg:w-64 shrink-0"
                     >
                         <div
-                            className="rounded-2xl border-2 border-neutral-200 overflow-hidden bg-white"
-                            style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                            className="rounded-2xl border-2 border-neutral-200 overflow-hidden bg-white shadow-sm"
                         >
                             <nav className="p-3">
                                 {navItems.map((item) => (
@@ -97,8 +73,7 @@ const UserSettings: React.FC = () => {
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white"
-                                style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white shadow-sm"
                             >
                                 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                                     <div className="relative group cursor-pointer">
@@ -128,8 +103,7 @@ const UserSettings: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white"
-                                style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white shadow-sm"
                             >
                                 <h3 className="text-lg font-bold text-neutral-900 mb-6">Personal Information</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -162,8 +136,7 @@ const UserSettings: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white"
-                                style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white shadow-sm"
                             >
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-bold text-neutral-900">Professional Documents</h3>
@@ -197,8 +170,7 @@ const UserSettings: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white"
-                                style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                                className="rounded-2xl border-2 border-neutral-200 p-6 bg-white shadow-sm"
                             >
                                 <h3 className="text-lg font-bold text-neutral-900 mb-6">App Preferences</h3>
                                 <div className="flex flex-col gap-6">

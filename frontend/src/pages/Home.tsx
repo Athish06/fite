@@ -36,62 +36,11 @@ const Home: React.FC = () => {
     ];
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Subtle Paper Texture */}
-            <div
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-                style={{
-                    left: 0,
-                    right: 0,
-                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
-                }}
-            >
-                {/* Grainy Paper Texture */}
-                <div
-                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.08] mix-blend-multiply"
-                    style={{ filter: 'contrast(110%) brightness(100%)' }}
-                />
-
-                {/* Organic Watercolor Gradients */}
-                {isDaily ? (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, rgba(187, 247, 208, 0.2) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-25"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.4) 0%, rgba(209, 250, 229, 0.2) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-35"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.5) 0%, rgba(254, 215, 170, 0.3) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.5) 0%, rgba(253, 230, 188, 0.3) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                    </>
-                )}
-            </div>
+        <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
+            <div className="mx-auto w-full max-w-6xl">
 
             {/* Header */}
-            <div className="relative z-10 flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
                         Dashboard
@@ -109,10 +58,7 @@ const Home: React.FC = () => {
                 transition={{ duration: 0.4 }}
                 className="relative z-10 mb-10"
             >
-                <div
-                    className="relative overflow-hidden rounded-2xl p-8 border-2 border-neutral-200 bg-white"
-                    style={{ boxShadow: '0 4px 24px rgba(0, 0, 0, 0.04)' }}
-                >
+                <div className="relative overflow-hidden rounded-2xl p-8 border-2 border-neutral-200 bg-white shadow-sm">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${isDaily ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
@@ -152,8 +98,7 @@ const Home: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * index }}
-                        className="p-5 rounded-2xl border-2 border-neutral-200 bg-white hover:border-neutral-300 transition-all"
-                        style={{ boxShadow: '0 2px 12px rgba(0, 0, 0, 0.03)' }}
+                        className="p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all"
                     >
                         <div className="flex items-center justify-between mb-3">
                             <div className={`w-10 h-10 rounded-xl ${isDaily ? 'bg-emerald-50' : 'bg-amber-50'} flex items-center justify-center`}>
@@ -181,8 +126,7 @@ const Home: React.FC = () => {
                             transition={{ delay: 0.2 + 0.1 * index }}
                             whileHover={{ y: -4 }}
                             onClick={() => navigate(action.path)}
-                            className="group cursor-pointer p-6 rounded-2xl border-2 border-neutral-200 bg-white hover:border-neutral-300 transition-all"
-                            style={{ boxShadow: '0 2px 12px rgba(0, 0, 0, 0.03)' }}
+                            className="group cursor-pointer p-6 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all"
                         >
                             <h3 className="text-lg font-bold text-neutral-900 mb-1">{action.title}</h3>
                             <p className="text-sm text-neutral-500 mb-4">{action.desc}</p>
@@ -199,8 +143,7 @@ const Home: React.FC = () => {
             <div className="relative z-10">
                 <h2 className="text-lg font-bold text-neutral-900 mb-4">Recent Activity</h2>
                 <div
-                    className="rounded-2xl border-2 border-neutral-200 bg-white overflow-hidden"
-                    style={{ boxShadow: '0 2px 12px rgba(0, 0, 0, 0.03)' }}
+                    className="rounded-2xl border-2 border-neutral-200 bg-white overflow-hidden shadow-sm"
                 >
                     {recentJobs.map((job, index) => (
                         <motion.div
@@ -231,6 +174,7 @@ const Home: React.FC = () => {
                         </motion.div>
                     ))}
                 </div>
+            </div>
             </div>
         </div>
     );

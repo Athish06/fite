@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Home, Briefcase, FileText,
-    Menu, X, ChevronRight, Search
+    Menu, X, ChevronRight, Search, LogOut
 } from "lucide-react";
 import { useMode } from "../context/ModeContext";
+import { useAuth } from "../context/AuthContext";
 import GlobalToggle from "../components/shared/GlobalToggle";
 
 interface NavItem {
@@ -26,6 +27,14 @@ const Layout: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { mode } = useMode();
+    const { user, logout } = useAuth();
+
+    // Handle logout
+    const handleLogout = async () => {
+        setIsOpen(false);
+        await logout();
+        navigate('/login', { replace: true });
+    };
 
     // Don't show mode toggle on job-responses, job-detail, and applicants pages
     const hideToggle = location.pathname.includes("/job-responses") || location.pathname.includes("/job-detail") || location.pathname.includes("/applicants");
@@ -150,24 +159,39 @@ const Layout: React.FC = () => {
                                 })}
                             </div>
 
-                            <div className="p-3 border-t border-neutral-100">
-                                <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        navigate('/profile');
-                                    }}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-neutral-50"
-                                >
+                            <div className="p-3 border-t border-neutral-100 space-y-2">
+                                {/* Profile Info */}
+                                <div className="flex items-center gap-3 px-4 py-2">
                                     <img
                                         src="https://i.pravatar.cc/150?img=3"
                                         className="h-9 w-9 rounded-full object-cover ring-2 ring-neutral-200"
                                         alt="Avatar"
                                     />
                                     <div className="text-left flex-1">
-                                        <div className="font-semibold text-sm text-neutral-800">Athish</div>
-                                        <div className="text-xs text-neutral-500">View Profile</div>
+                                        <div className="font-semibold text-sm text-neutral-800">{user?.email?.split('@')[0] || 'User'}</div>
+                                        <div className="text-xs text-neutral-500">{user?.role || 'Member'}</div>
                                     </div>
-                                </button>
+                                </div>
+
+                                {/* Action Buttons Row */}
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setIsOpen(false);
+                                            navigate('/settings');
+                                        }}
+                                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                                    >
+                                        View Profile
+                                    </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors bg-red-50 text-red-600 hover:bg-red-100"
+                                        title="Logout"
+                                    >
+                                        <LogOut size={16} />
+                                    </button>
+                                </div>
                             </div>
                         </motion.nav>
                     </>
@@ -182,7 +206,7 @@ const Layout: React.FC = () => {
             )}
 
             {/* Main Content */}
-            <main className="relative z-10 min-h-screen pt-24 px-4 md:px-8 pb-8">
+            <main className="relative min-h-screen pt-24 px-4 md:px-8 pb-8">
                 <Outlet />
             </main>
         </div>

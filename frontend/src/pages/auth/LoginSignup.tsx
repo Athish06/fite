@@ -1,10 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Briefcase, HardHat } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginSignup: React.FC = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
+    const [formData, setFormData] = useState({ email: '', password: '', role: 'worker' });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login, isAuthenticated } = useAuth();
+
+    // Redirect to home if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/home', { replace: true });
+        }
+    }, [isAuthenticated, navigate]);
+
+    /**
+     * Handle input changes and update form data state
+     */
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setError(''); // Clear error on input change
+    };
+
+    /**
+     * Handle form submission for both login and signup
+     * Sends credentials to backend API and handles authentication
+     */
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
+            const response = await fetch(`http://localhost:8000${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // Important: Send cookies with request
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Authentication failed');
+            }
+
+            // Update auth context with user data
+            login({ email: data.user.email, role: data.user.role });
+
+            // Authentication successful - navigate to home
+            navigate('/home', { replace: true });
+        } catch (err: any) {
+            setError(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="flex min-h-screen w-full flex-row bg-neutral-50">
@@ -91,16 +148,26 @@ const LoginSignup: React.FC = () => {
                     </div>
 
                     {/* Form */}
-                    <form className="flex flex-col gap-5 mt-8" onSubmit={(e) => e.preventDefault()}>
+                    <form className="flex flex-col gap-5 mt-8" onSubmit={handleSubmit}>
+                        {/* Error Message */}
+                        {error && (
+                            <div className="rounded-xl bg-red-50 border-2 border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+                                {error}
+                            </div>
+                        )}
+
                         {/* Email Field */}
                         <div className="flex flex-col gap-2">
                             <label className="text-neutral-700 text-sm font-semibold" htmlFor="email">Email Address</label>
                             <input
                                 className="w-full rounded-xl text-neutral-900 placeholder:text-neutral-400 bg-neutral-50 border-2 border-neutral-200 focus:outline-none focus:ring-0 focus:border-neutral-900 h-12 px-4 text-sm font-medium transition-all"
                                 id="email"
+                                name="email"
                                 placeholder="name@example.com"
                                 required
                                 type="email"
+                                value={formData.email}
+                                onChange={handleChange}
                             />
                         </div>
 
@@ -114,9 +181,13 @@ const LoginSignup: React.FC = () => {
                                 <input
                                     className="w-full rounded-xl text-neutral-900 placeholder:text-neutral-400 bg-neutral-50 border-2 border-neutral-200 focus:outline-none focus:ring-0 focus:border-neutral-900 h-12 px-4 pr-12 text-sm font-medium transition-all"
                                     id="password"
+                                    name="password"
                                     placeholder="Enter your password"
                                     required
                                     type={showPassword ? "text" : "password"}
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    minLength={6}
                                 />
                                 <div
                                     className="absolute right-0 top-0 bottom-0 flex items-center pr-4 text-neutral-400 cursor-pointer hover:text-neutral-600"
@@ -127,15 +198,33 @@ const LoginSignup: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Role Selection (Only for Signup) */}
+                        {!isLogin && (
+                            <div className="flex flex-col gap-2">
+                                <label className="text-neutral-700 text-sm font-semibold" htmlFor="role">Account Type</label>
+                                <select
+                                    className="w-full rounded-xl text-neutral-900 bg-neutral-50 border-2 border-neutral-200 focus:outline-none focus:ring-0 focus:border-neutral-900 h-12 px-4 text-sm font-medium transition-all"
+                                    id="role"
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="worker">Worker - Looking for jobs</option>
+                                    <option value="provider">Provider - Posting jobs</option>
+                                    <option value="hybrid">Hybrid - Both worker and provider</option>
+                                </select>
+                            </div>
+                        )}
+
                         {/* Submit Button */}
-                        <Link to="/" className="mt-2">
-                            <button
-                                className="flex w-full cursor-pointer items-center justify-center rounded-xl h-12 px-5 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold transition-colors"
-                                type="submit"
-                            >
-                                {isLogin ? 'Sign In' : 'Create Account'}
-                            </button>
-                        </Link>
+                        <button
+                            className="flex w-full cursor-pointer items-center justify-center rounded-xl h-12 px-5 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white text-sm font-bold transition-colors mt-2"
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+                        </button>
                     </form>
 
                     {/* Divider */}

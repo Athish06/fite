@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMode } from '../../context/ModeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, List, MapPin, Clock, IndianRupee, Star, Calendar, CheckCircle, XCircle, Clock3, ChevronDown } from 'lucide-react';
+import TextType from '../../components/ui/TextType';
 
 type JobStatus = 'completed' | 'selected' | 'rejected' | 'waiting';
 type DateFilter = 'today' | 'yesterday' | 'this-week' | 'this-month' | 'all';
@@ -183,66 +184,21 @@ const AppliedJobs: React.FC = () => {
     const avgRating = (dailyJobs.reduce((sum, job) => sum + job.rating, 0) / dailyJobs.length).toFixed(1);
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Subtle Paper Texture */}
-            <div
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-                style={{
-                    left: 0,
-                    right: 0,
-                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
-                }}
-            >
-                {/* Grainy Paper Texture */}
-                <div
-                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.08] mix-blend-multiply"
-                    style={{ filter: 'contrast(110%) brightness(100%)' }}
-                />
-
-                {/* Organic Watercolor Gradients */}
-                {isDaily ? (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, rgba(187, 247, 208, 0.2) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-25"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.4) 0%, rgba(209, 250, 229, 0.2) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-35"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.5) 0%, rgba(254, 215, 170, 0.3) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.5) 0%, rgba(253, 230, 188, 0.3) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                    </>
-                )}
-            </div>
+        <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
+            <div className="relative z-10 mx-auto w-full max-w-6xl">
 
             {/* Header Toolbar */}
-            <div className="relative z-10 flex items-center justify-between mb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
                 {/* Left: Title */}
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
-                        {isDaily ? "Job History" : "Applications"}
+                        <TextType
+                            key={isDaily ? 'applied-daily' : 'applied-longterm'}
+                            text={isDaily ? 'Job History' : 'Applications'}
+                            typingSpeed={80}
+                            loop={false}
+                            showCursor={false}
+                        />
                     </h1>
                     <p className="text-sm text-neutral-500 mt-1 font-medium">
                         {isDaily ? "Your completed jobs and earnings" : "Track your job applications"}
@@ -250,12 +206,12 @@ const AppliedJobs: React.FC = () => {
                 </div>
 
                 {/* Right: Control Bar */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     {/* Date Filter Dropdown */}
                     <div className="relative">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
+                            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border-2 border-neutral-200 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300 transition-colors"
                         >
                             <Calendar size={16} />
                             {dateFilterOptions.find(o => o.value === dateFilter)?.label}
@@ -291,7 +247,7 @@ const AppliedJobs: React.FC = () => {
                     </div>
 
                     {/* View Switcher - Segmented Control */}
-                    <div className="relative flex items-center p-1.5 rounded-xl bg-neutral-200">
+                    <div className="relative flex items-center p-1 rounded-xl bg-neutral-100 border-2 border-neutral-200">
                         <motion.div
                             layoutId="appliedViewToggle"
                             className="absolute h-9 w-10 rounded-lg bg-neutral-900"
@@ -324,25 +280,22 @@ const AppliedJobs: React.FC = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="relative z-10 grid grid-cols-3 gap-4 mb-6"
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
                 >
                     <div
-                        className="p-4 rounded-xl border border-neutral-300/80"
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
                     >
                         <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Total Earned</p>
                         <p className="text-2xl font-bold text-neutral-800">₹{totalEarnings.toLocaleString()}</p>
                     </div>
                     <div
-                        className="p-4 rounded-xl border border-neutral-300/80"
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
                     >
                         <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Jobs Completed</p>
                         <p className="text-2xl font-bold text-neutral-800">{dailyJobs.length}</p>
                     </div>
                     <div
-                        className="p-4 rounded-xl border border-neutral-300/80"
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
                     >
                         <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Avg Rating</p>
                         <p className="text-2xl font-bold text-neutral-800 flex items-center gap-1">
@@ -361,7 +314,7 @@ const AppliedJobs: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+                        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
                     >
                         {isDaily ? (
                             // Daily Wage Completed Jobs
@@ -371,14 +324,10 @@ const AppliedJobs: React.FC = () => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="group relative cursor-pointer p-5 rounded-xl border border-neutral-300/80 hover:border-neutral-400 transition-all duration-300"
-                                    style={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
-                                    }}
+                                    className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
                                 >
                                     {/* Accent Line */}
-                                    <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-800" />
+                                    <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-900/80" />
 
                                     {/* Header */}
                                     <div className="flex items-start justify-between mb-3">
@@ -425,11 +374,7 @@ const AppliedJobs: React.FC = () => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="group relative cursor-pointer p-5 rounded-xl border border-neutral-300/80 hover:border-neutral-400 transition-all duration-300"
-                                    style={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
-                                    }}
+                                    className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
                                 >
                                     {/* Accent Line */}
                                     <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${job.status === 'selected' ? 'bg-emerald-500' :
@@ -480,10 +425,10 @@ const AppliedJobs: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="relative z-10 space-y-2"
+                        className="space-y-2"
                     >
                         {/* Table Header */}
-                        <div className="grid grid-cols-12 gap-4 px-5 py-3 text-[11px] uppercase tracking-wider font-semibold text-neutral-500">
+                        <div className="grid grid-cols-12 gap-4 rounded-2xl border-2 border-neutral-200 bg-white px-5 py-3 text-[11px] uppercase tracking-wider font-semibold text-neutral-500 shadow-sm">
                             <div className="col-span-3">Job Title</div>
                             <div className="col-span-3">{isDaily ? 'Employer' : 'Company'}</div>
                             <div className="col-span-2">{isDaily ? 'Earnings' : 'Salary'}</div>
@@ -498,11 +443,7 @@ const AppliedJobs: React.FC = () => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-lg border border-neutral-300/80 hover:border-neutral-400 transition-all duration-200"
-                                    style={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
-                                    }}
+                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-200"
                                 >
                                     <div className="col-span-3 flex items-center gap-3">
                                         <div className="w-1.5 h-1.5 rounded-full bg-neutral-800" />
@@ -527,11 +468,7 @@ const AppliedJobs: React.FC = () => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-lg border border-neutral-300/80 hover:border-neutral-400 transition-all duration-200"
-                                    style={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
-                                    }}
+                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-200"
                                 >
                                     <div className="col-span-3 flex items-center gap-3">
                                         <div className={`w-1.5 h-1.5 rounded-full ${job.status === 'selected' ? 'bg-emerald-500' :
@@ -553,6 +490,7 @@ const AppliedJobs: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            </div>
         </div>
     );
 };

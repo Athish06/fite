@@ -93,7 +93,7 @@ const DailyWageJobResponses: React.FC = () => {
                         exit={{ opacity: 0, y: -20 }}
                         className="fixed top-6 left-1/2 -translate-x-1/2 z-20"
                     >
-                        <div className="px-6 py-3 rounded-full bg-white/90 backdrop-blur-md border border-neutral-200 shadow-lg flex items-center gap-3">
+                        <div className="px-6 py-3 rounded-full bg-white border-2 border-neutral-200 shadow-sm flex items-center gap-3">
                             {status === 'searching' && (
                                 <>
                                     <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
@@ -126,7 +126,7 @@ const DailyWageJobResponses: React.FC = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
                         />
 
                         {/* Modal */}
@@ -134,7 +134,7 @@ const DailyWageJobResponses: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-50"
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-[101]"
                         >
                             <div className="rounded-2xl bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 shadow-2xl overflow-hidden">
                                 {/* Header */}

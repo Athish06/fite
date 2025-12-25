@@ -90,29 +90,8 @@ const JobDetail: React.FC = () => {
     }, [negotiationPrice]);
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8 bg-[#F7FAF8]">
-            {/* Background Pattern */}
-            <div
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-                style={{
-                    left: 0,
-                    right: 0,
-                    backgroundColor: isDaily ? '#F7FAF8' : '#FAF9F7'
-                }}
-            >
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.06] mix-blend-multiply" />
-                {isDaily ? (
-                    <>
-                        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-                        <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[50%] rounded-full opacity-20" style={{ background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.3) 0%, transparent 70%)', filter: 'blur(70px)' }} />
-                    </>
-                ) : (
-                    <>
-                        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-30" style={{ background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.4) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-                        <div className="absolute bottom-[-10%] left-[-10%] w-[55%] h-[55%] rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.3) 0%, transparent 70%)', filter: 'blur(70px)' }} />
-                    </>
-                )}
-            </div>
+        <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
+            <div className="mx-auto w-full max-w-6xl">
 
             {/* Header */}
             <div className="relative z-10 flex items-center justify-between mb-6">
@@ -129,8 +108,7 @@ const JobDetail: React.FC = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative z-10 mb-6 p-6 pl-8 rounded-2xl bg-white border-2 border-neutral-200"
-                style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                className="relative z-10 mb-6 p-6 pl-8 rounded-2xl bg-white border-2 border-neutral-200 shadow-sm"
             >
                 {/* Left Accent Line */}
                 <div className="absolute left-0 top-6 bottom-6 w-1.5 rounded-full bg-neutral-900" />
@@ -208,8 +186,7 @@ const JobDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="p-6 rounded-2xl bg-white border-2 border-neutral-200"
-                    style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                    className="p-6 rounded-2xl bg-white border-2 border-neutral-200 shadow-sm"
                 >
                     <h3 className="text-lg font-bold mb-3 text-neutral-900">Description</h3>
                     <p className="text-sm leading-relaxed text-neutral-600">{jobData.description}</p>
@@ -220,8 +197,7 @@ const JobDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="p-6 rounded-2xl bg-white border-2 border-neutral-200"
-                    style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                    className="p-6 rounded-2xl bg-white border-2 border-neutral-200 shadow-sm"
                 >
                     <h3 className="text-lg font-bold mb-3 text-neutral-900">Requirements</h3>
                     <ul className="space-y-2.5">
@@ -241,8 +217,7 @@ const JobDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="z-10 p-6 rounded-2xl mb-20 bg-white border-2 border-neutral-200"
-                    style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}
+                    className="z-10 p-6 rounded-2xl mb-20 bg-white border-2 border-neutral-200 shadow-sm"
                 >
                     <div className="flex items-center justify-between mb-5">
                         <h3 className="text-lg font-bold text-neutral-900">Applicant Workers</h3>
@@ -331,7 +306,7 @@ const JobDetail: React.FC = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
                             onClick={() => setSelectedWorker(null)}
                         />
 
@@ -339,7 +314,7 @@ const JobDetail: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-50"
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-[101]"
                         >
                             <div className="rounded-2xl overflow-hidden shadow-2xl bg-white border-2 border-neutral-200">
                                 {/* Header */}
@@ -490,6 +465,7 @@ const JobDetail: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            </div>
         </div>
     );
 };

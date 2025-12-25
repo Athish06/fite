@@ -193,79 +193,14 @@ const ExploreJobs: React.FC = () => {
     };
 
     return (
-        <div className="w-full min-h-screen relative px-6 md:px-8 pt-8 pb-8">
-            {/* Background Pattern - Watercolor Paper Texture */}
-            <div
-                className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-                style={{
-                    left: 0,
-                    right: 0,
-                    backgroundColor: isDaily ? '#F5F9F7' : '#FAF8F5'
-                }}
-            >
-                {/* Grainy Paper Texture */}
-                <div
-                    className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-multiply"
-                    style={{ filter: 'contrast(110%) brightness(100%)' }}
-                />
-
-                {/* Organic Watercolor Gradients */}
-                {isDaily ? (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-40"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.5) 0%, rgba(187, 247, 208, 0.3) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[20%] left-[-10%] w-[50%] h-[45%] rounded-full opacity-35"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(167, 243, 208, 0.5) 0%, rgba(209, 250, 229, 0.3) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                        <div
-                            className="absolute bottom-[-15%] right-[10%] w-[55%] h-[50%] rounded-full opacity-30"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(110, 231, 183, 0.4) 0%, rgba(167, 243, 208, 0.2) 45%, transparent 70%)',
-                                filter: 'blur(70px)'
-                            }}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <div
-                            className="absolute top-[-10%] right-[-5%] w-[60%] h-[50%] rounded-full opacity-50"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(251, 191, 136, 0.6) 0%, rgba(254, 215, 170, 0.4) 40%, transparent 70%)',
-                                filter: 'blur(60px)'
-                            }}
-                        />
-                        <div
-                            className="absolute top-[15%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-40"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 188, 0.4) 50%, transparent 70%)',
-                                filter: 'blur(80px)'
-                            }}
-                        />
-                        <div
-                            className="absolute bottom-[-10%] right-[5%] w-[55%] h-[55%] rounded-full opacity-45"
-                            style={{
-                                background: 'radial-gradient(ellipse at center, rgba(252, 211, 165, 0.5) 0%, rgba(254, 226, 185, 0.3) 45%, transparent 70%)',
-                                filter: 'blur(70px)'
-                            }}
-                        />
-                    </>
-                )}
-            </div>
+        <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
+            <div className="mx-auto w-full max-w-6xl">
 
             {/* Header Toolbar */}
-            <div className="relative z-10 flex items-center justify-between mb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
                 {/* Left: Title with Typewriter */}
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-neutral-800">
+                    <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
                         <TextType
                             text="Explore Jobs"
                             typingSpeed={80}
@@ -273,7 +208,7 @@ const ExploreJobs: React.FC = () => {
                             showCursor={false}
                         />
                     </h1>
-                    <p className="text-sm text-neutral-600 mt-1">
+                    <p className="text-sm text-neutral-500 mt-1 font-medium">
                         {isDaily ? "Find daily wage opportunities near you" : "Discover long-term career opportunities"}
                     </p>
                 </div>
@@ -282,27 +217,24 @@ const ExploreJobs: React.FC = () => {
                 <div className="flex items-center gap-3">
                     {/* View Switcher - Cards/Map (only for daily wage) */}
                     {isDaily && isExploring && foundJobs.length > 0 && (
-                        <div className="relative flex items-center p-1 rounded-lg bg-white/60 border border-neutral-300/80 backdrop-blur-sm">
+                        <div className="relative flex w-[92px] items-center rounded-xl border-2 border-neutral-200 bg-white p-1 shadow-sm">
                             <motion.div
                                 layoutId="exploreViewToggle"
-                                className="absolute h-8 rounded-md bg-neutral-900 shadow-sm"
+                                className="absolute inset-y-1 left-1 w-1/2 rounded-lg bg-neutral-900 shadow-sm"
                                 initial={false}
-                                animate={{
-                                    x: viewMode === 'card' ? 4 : 44,
-                                    width: 36
-                                }}
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                animate={{ x: viewMode === 'card' ? '0%' : '100%' }}
+                                transition={{ type: 'spring', stiffness: 520, damping: 38 }}
                             />
                             <button
                                 onClick={() => setViewMode('card')}
-                                className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${viewMode === 'card' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                                className={`relative z-10 flex h-9 w-1/2 items-center justify-center rounded-lg transition-colors ${viewMode === 'card' ? 'text-white' : 'text-neutral-700 hover:text-neutral-900'
                                     }`}
                             >
                                 <LayoutGrid size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('map')}
-                                className={`relative z-10 w-9 h-8 flex items-center justify-center rounded-md transition-colors ${viewMode === 'map' ? 'text-white' : 'text-neutral-600 hover:text-neutral-800'
+                                className={`relative z-10 flex h-9 w-1/2 items-center justify-center rounded-lg transition-colors ${viewMode === 'map' ? 'text-white' : 'text-neutral-700 hover:text-neutral-900'
                                     }`}
                             >
                                 <Map size={16} />
@@ -350,8 +282,7 @@ const ExploreJobs: React.FC = () => {
                 >
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div
-                            className="inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-300/80"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                            className="inline-flex items-center gap-3 px-4 py-3 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
                         >
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -376,9 +307,8 @@ const ExploreJobs: React.FC = () => {
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${showFilters
                                     ? 'bg-neutral-900 text-white border-neutral-900'
-                                    : 'bg-white/80 text-neutral-700 border-neutral-300/80 hover:bg-neutral-50'
+                                    : 'bg-white text-neutral-800 border-2 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300 shadow-sm'
                                     }`}
-                                style={!showFilters ? { boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)' } : {}}
                             >
                                 <Filter size={16} />
                                 Filters
@@ -397,8 +327,7 @@ const ExploreJobs: React.FC = () => {
                                 className="overflow-hidden"
                             >
                                 <div
-                                    className="mt-4 p-4 rounded-xl border border-neutral-300/80"
-                                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                                    className="mt-4 p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
                                 >
                                     <div className="flex flex-wrap items-end gap-6">
                                         {/* Distance Filter */}
@@ -489,8 +418,7 @@ const ExploreJobs: React.FC = () => {
                             className="relative z-10 flex flex-col items-center justify-center py-20"
                         >
                             <div
-                                className="p-8 rounded-2xl border border-neutral-300/80 text-center max-w-md"
-                                style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                                className="p-8 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm text-center max-w-md"
                             >
                                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
                                     <MapPin size={32} className="text-neutral-600" />
@@ -502,7 +430,7 @@ const ExploreJobs: React.FC = () => {
                                 </p>
                                 <button
                                     onClick={requestLocationAndStart}
-                                    className="px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition-colors"
+                                    className="px-6 py-3 rounded-xl bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition-colors"
                                 >
                                     <Play size={16} className="inline mr-2" />
                                     Start Exploring
@@ -537,11 +465,7 @@ const ExploreJobs: React.FC = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
                                     onClick={() => setSelectedJob(job)}
-                                    className="group relative cursor-pointer p-5 rounded-xl border border-neutral-300/80 hover:border-neutral-400 transition-all duration-300"
-                                    style={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
-                                    }}
+                                    className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
                                 >
                                     {/* Accent Line */}
                                     <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-800" />
@@ -614,8 +538,7 @@ const ExploreJobs: React.FC = () => {
                                 {foundJobs.map((job) => (
                                     <div
                                         key={job.id}
-                                        className="p-4 rounded-2xl border border-neutral-300/80 cursor-pointer hover:border-neutral-400 transition-all"
-                                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+                                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm cursor-pointer hover:shadow-md hover:border-neutral-300 transition-all"
                                     >
                                         {/* Job Header */}
                                         <div className="flex items-start justify-between mb-3">
@@ -665,11 +588,7 @@ const ExploreJobs: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="group relative cursor-pointer p-5 rounded-xl border border-neutral-300/80 hover:border-neutral-400 transition-all duration-300"
-                                style={{
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
-                                }}
+                                className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
                             >
                                 {/* Accent Line */}
                                 <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-600" />
@@ -893,6 +812,7 @@ const ExploreJobs: React.FC = () => {
                     </>
                 )}
             </AnimatePresence>
+            </div>
         </div>
     );
 };

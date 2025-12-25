@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+.env
+.env.*.local
 # Legacy frontend directory
 legacy_frontend
 
