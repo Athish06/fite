@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.database import Database
 from app.core.config import settings
-from app.api import auth
+from app.api import auth, jobs
 
 
 @asynccontextmanager
@@ -48,6 +48,9 @@ app.add_middleware(
 
 # Include authentication routes
 app.include_router(auth.router)
+
+# Include job routes
+app.include_router(jobs.router)
 
 
 @app.get("/")
