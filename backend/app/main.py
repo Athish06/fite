@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from app.core.database import Database
 from app.core.config import settings
 from app.api import auth, jobs
+from app.api import applications
 
 
 @asynccontextmanager
@@ -48,6 +49,12 @@ app.add_middleware(
 
 # Include authentication routes
 app.include_router(auth.router)
+
+# Include job routes
+app.include_router(jobs.router)
+
+# Include application routes
+app.include_router(applications.router)
 
 # Include job routes
 app.include_router(jobs.router)

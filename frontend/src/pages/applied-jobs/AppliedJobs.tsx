@@ -1,142 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMode } from '../../context/ModeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, List, MapPin, Clock, IndianRupee, Star, Calendar, CheckCircle, XCircle, Clock3, ChevronDown } from 'lucide-react';
+import { LayoutGrid, List, MapPin, IndianRupee, Calendar, CheckCircle, XCircle, Clock3, ChevronDown, Loader2, X } from 'lucide-react';
 import TextType from '../../components/ui/TextType';
 
-type JobStatus = 'completed' | 'selected' | 'rejected' | 'waiting';
+type JobStatus = 'APPLIED' | 'COMPLETED' | 'CANCELLED';
 type DateFilter = 'today' | 'yesterday' | 'this-week' | 'this-month' | 'all';
 
-interface DailyJob {
-    id: number;
-    title: string;
-    location: string;
-    pay: string;
-    time: string;
-    status: 'completed';
-    completedAt: string;
-    rating: number;
-    employer: string;
-    duration: string;
+interface DailyMeta {
+    original_price: number;
+    final_agreed_price?: number;
+    is_locked: boolean;
+    negotiation_history: any[];
 }
 
-interface LongTermJob {
-    id: number;
-    title: string;
-    company: string;
-    location: string;
-    salary: string;
-    type: string;
+interface LongTermMeta {
+    resume_url?: string;
+    match_score?: number;
+    cover_letter?: string;
+}
+
+interface Application {
+    _id: string;
+    worker_id: string;
+    job_id: string;
+    provider_id: string;
+    job_snapshot: {
+        title: string;
+        location: string;
+        type: 'daily' | 'longterm';
+        cover_image?: string;
+    };
     status: JobStatus;
-    appliedAt: string;
-    responseAt?: string;
+    daily_meta?: DailyMeta;
+    long_term_meta?: LongTermMeta;
+    created_at: string;
+    updated_at: string;
 }
 
 const AppliedJobs: React.FC = () => {
     const { mode } = useMode();
     const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
-    const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+    const [dateFilter, setDateFilter] = useState<DateFilter>('all');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [applications, setApplications] = useState<Application[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [cancellingId, setCancellingId] = useState<string | null>(null);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
 
     const isDaily = mode === 'daily';
 
-    // Mock data for daily wage completed jobs
-    const dailyJobs: DailyJob[] = [
-        {
-            id: 1,
-            title: "Plumbing Repair",
-            location: "Indiranagar, Bangalore",
-            pay: "₹850",
-            time: "9 AM - 5 PM",
-            status: "completed",
-            completedAt: "Today, 5:30 PM",
-            rating: 4.8,
-            employer: "Rahul Sharma",
-            duration: "8 hours"
-        },
-        {
-            id: 2,
-            title: "Electrical Wiring",
-            location: "Koramangala, Bangalore",
-            pay: "₹1,200",
-            time: "10 AM - 6 PM",
-            status: "completed",
-            completedAt: "Today, 6:00 PM",
-            rating: 5.0,
-            employer: "Priya Patel",
-            duration: "8 hours"
-        },
-        {
-            id: 3,
-            title: "House Painting",
-            location: "HSR Layout, Bangalore",
-            pay: "₹900",
-            time: "8 AM - 4 PM",
-            status: "completed",
-            completedAt: "Yesterday, 4:00 PM",
-            rating: 4.5,
-            employer: "Vikram Kumar",
-            duration: "8 hours"
-        },
-        {
-            id: 4,
-            title: "AC Servicing",
-            location: "Whitefield, Bangalore",
-            pay: "₹700",
-            time: "11 AM - 3 PM",
-            status: "completed",
-            completedAt: "Yesterday, 3:30 PM",
-            rating: 4.9,
-            employer: "Meera Singh",
-            duration: "4 hours"
-        }
-    ];
+    // Fetch applications from backend
+    useEffect(() => {
+        fetchApplications();
+    }, []);
 
-    // Mock data for long-term job applications
-    const longTermJobs: LongTermJob[] = [
-        {
-            id: 1,
-            title: "Frontend Developer",
-            company: "TechCorp Solutions",
-            location: "Bangalore",
-            salary: "₹12 LPA",
-            type: "Full-time",
-            status: "selected",
-            appliedAt: "Dec 15, 2025",
-            responseAt: "Dec 17, 2025"
-        },
-        {
-            id: 2,
-            title: "UI/UX Designer",
-            company: "DesignHub India",
-            location: "Remote",
-            salary: "₹10 LPA",
-            type: "Full-time",
-            status: "waiting",
-            appliedAt: "Dec 16, 2025"
-        },
-        {
-            id: 3,
-            title: "React Developer Intern",
-            company: "StartupXYZ",
-            location: "Hyderabad",
-            salary: "₹25,000/month",
-            type: "Internship",
-            status: "rejected",
-            appliedAt: "Dec 10, 2025",
-            responseAt: "Dec 14, 2025"
-        },
-        {
-            id: 4,
-            title: "Full Stack Developer",
-            company: "GlobalTech",
-            location: "Bangalore",
-            salary: "₹15 LPA",
-            type: "Full-time",
-            status: "waiting",
-            appliedAt: "Dec 18, 2025"
+    const fetchApplications = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:8000/api/applications/my-applications', {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setApplications(data.applications || []);
+            }
+        } catch (error) {
+            console.error('Error fetching applications:', error);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
+
+    const handleCancelApplication = async () => {
+        if (!selectedAppId) return;
+        
+        setCancellingId(selectedAppId);
+        try {
+            const response = await fetch('http://localhost:8000/api/applications/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ application_id: selectedAppId })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Refresh applications
+                await fetchApplications();
+                setShowCancelModal(false);
+            } else {
+                alert(data.detail || 'Failed to cancel application');
+            }
+        } catch (error) {
+            console.error('Error cancelling application:', error);
+            alert('Failed to cancel application');
+        } finally {
+            setCancellingId(null);
+            setSelectedAppId(null);
+        }
+    };
+
+    // Filter applications by type and date
+    const filteredApplications = applications.filter(app => {
+        // Filter by job type
+        if (isDaily && app.job_snapshot.type !== 'daily') return false;
+        if (!isDaily && app.job_snapshot.type !== 'longterm') return false;
+        
+        // TODO: Add date filtering logic based on dateFilter
+        return true;
+    });
 
     const dateFilterOptions = [
         { value: 'today', label: 'Today' },
@@ -148,40 +124,26 @@ const AppliedJobs: React.FC = () => {
 
     const getStatusBadge = (status: JobStatus) => {
         switch (status) {
-            case 'completed':
+            case 'COMPLETED':
                 return (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
                         <CheckCircle size={12} /> Completed
                     </span>
                 );
-            case 'selected':
+            case 'APPLIED':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
-                        <CheckCircle size={12} /> Selected
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
+                        <Clock3 size={12} /> Applied
                     </span>
                 );
-            case 'rejected':
+            case 'CANCELLED':
                 return (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-100 text-red-700 text-xs font-medium">
-                        <XCircle size={12} /> Rejected
-                    </span>
-                );
-            case 'waiting':
-                return (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-xs font-medium">
-                        <Clock3 size={12} /> Waiting
+                        <XCircle size={12} /> Cancelled
                     </span>
                 );
         }
     };
-
-    // Calculate total earnings for daily wage
-    const totalEarnings = dailyJobs.reduce((sum, job) => {
-        const amount = parseInt(job.pay.replace('₹', '').replace(',', ''));
-        return sum + amount;
-    }, 0);
-
-    const avgRating = (dailyJobs.reduce((sum, job) => sum + job.rating, 0) / dailyJobs.length).toFixed(1);
 
     return (
         <div className="w-full min-h-screen relative px-4 md:px-8 pt-8 pb-10">
@@ -276,221 +238,213 @@ const AppliedJobs: React.FC = () => {
             </div>
 
             {/* Stats Summary for Daily Wage */}
-            {isDaily && (
+            {isDaily && filteredApplications.length > 0 && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
                 >
-                    <div
-                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
-                    >
+                    <div className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm">
                         <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Total Earned</p>
-                        <p className="text-2xl font-bold text-neutral-800">₹{totalEarnings.toLocaleString()}</p>
-                    </div>
-                    <div
-                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
-                    >
-                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Jobs Completed</p>
-                        <p className="text-2xl font-bold text-neutral-800">{dailyJobs.length}</p>
-                    </div>
-                    <div
-                        className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm"
-                    >
-                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Avg Rating</p>
-                        <p className="text-2xl font-bold text-neutral-800 flex items-center gap-1">
-                            <Star size={18} className="fill-amber-400 text-amber-400" />
-                            {avgRating}
+                        <p className="text-2xl font-bold text-neutral-800">
+                            ₹{filteredApplications.filter(a => a.status === 'COMPLETED').reduce((sum, app) => sum + (app.daily_meta?.final_agreed_price || 0), 0).toLocaleString()}
                         </p>
+                    </div>
+                    <div className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm">
+                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Jobs Completed</p>
+                        <p className="text-2xl font-bold text-neutral-800">{filteredApplications.filter(a => a.status === 'COMPLETED').length}</p>
+                    </div>
+                    <div className="p-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm">
+                        <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium mb-1">Applications</p>
+                        <p className="text-2xl font-bold text-neutral-800">{filteredApplications.length}</p>
                     </div>
                 </motion.div>
             )}
 
+            {/* Loading State */}
+            {loading && (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 size={32} className="animate-spin text-neutral-400" />
+                </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && filteredApplications.length === 0 && (
+                <div className="text-center py-20">
+                    <p className="text-neutral-600 text-lg mb-2">No applications yet</p>
+                    <p className="text-neutral-500 text-sm">Start applying to jobs to see them here</p>
+                </div>
+            )}
+
             {/* Jobs Grid/List */}
-            <AnimatePresence mode="wait">
-                {viewMode === 'card' ? (
-                    <motion.div
-                        key="cards"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-                    >
-                        {isDaily ? (
-                            // Daily Wage Completed Jobs
-                            dailyJobs.map((job, index) => (
+            {!loading && filteredApplications.length > 0 && (
+                <AnimatePresence mode="wait">
+                    {viewMode === 'card' ? (
+                        <motion.div
+                            key="cards"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+                        >
+                            {filteredApplications.map((app, index) => (
                                 <motion.div
-                                    key={job.id}
+                                    key={app._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
                                     className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
                                 >
                                     {/* Accent Line */}
-                                    <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-900/80" />
-
-                                    {/* Header */}
-                                    <div className="flex items-start justify-between mb-3">
-                                        <h3 className="text-lg font-semibold text-neutral-800 pr-3">{job.title}</h3>
-                                        {getStatusBadge('completed')}
-                                    </div>
-
-                                    {/* Employer */}
-                                    <p className="text-sm text-neutral-600 mb-3">by {job.employer}</p>
-
-                                    {/* Metrics */}
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                            <MapPin size={14} className="text-neutral-500" />
-                                            <span>{job.location}</span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-2 text-sm text-neutral-700">
-                                                <IndianRupee size={14} className="text-neutral-500" />
-                                                <span className="font-semibold">{job.pay}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                                <Clock size={14} className="text-neutral-500" />
-                                                <span>{job.duration}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Footer */}
-                                    <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between">
-                                        <div className="flex items-center gap-1 text-sm">
-                                            <Star size={14} className="fill-amber-400 text-amber-400" />
-                                            <span className="font-medium text-neutral-700">{job.rating}</span>
-                                        </div>
-                                        <span className="text-xs text-neutral-500">{job.completedAt}</span>
-                                    </div>
-                                </motion.div>
-                            ))
-                        ) : (
-                            // Long Term Job Applications
-                            longTermJobs.map((job, index) => (
-                                <motion.div
-                                    key={job.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
-                                >
-                                    {/* Accent Line */}
-                                    <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${job.status === 'selected' ? 'bg-emerald-500' :
-                                        job.status === 'rejected' ? 'bg-red-500' :
+                                    <div className={`absolute left-0 top-4 bottom-4 w-0.5 rounded-full ${app.status === 'COMPLETED' ? 'bg-emerald-500' :
+                                        app.status === 'CANCELLED' ? 'bg-red-500' :
                                             'bg-amber-500'
                                         }`} />
 
                                     {/* Header */}
-                                    <div className="flex items-start justify-between mb-2">
-                                        <h3 className="text-lg font-semibold text-neutral-800 pr-3">{job.title}</h3>
-                                        {getStatusBadge(job.status)}
+                                    <div className="flex items-start justify-between mb-3">
+                                        <h3 className="text-lg font-semibold text-neutral-800 pr-3">{app.job_snapshot.title}</h3>
+                                        {getStatusBadge(app.status)}
                                     </div>
-
-                                    {/* Company */}
-                                    <p className="text-sm font-medium text-neutral-700 mb-3">{job.company}</p>
 
                                     {/* Metrics */}
                                     <div className="space-y-2 mb-4">
                                         <div className="flex items-center gap-2 text-sm text-neutral-600">
                                             <MapPin size={14} className="text-neutral-500" />
-                                            <span>{job.location}</span>
+                                            <span>{app.job_snapshot.location}</span>
                                         </div>
-                                        <div className="flex items-center gap-4">
+                                        {isDaily && app.daily_meta && (
                                             <div className="flex items-center gap-2 text-sm text-neutral-700">
                                                 <IndianRupee size={14} className="text-neutral-500" />
-                                                <span className="font-medium">{job.salary}</span>
+                                                <span className="font-semibold">₹{app.daily_meta.final_agreed_price || app.daily_meta.original_price}</span>
                                             </div>
-                                            <span className="text-xs px-2 py-0.5 rounded-md border border-neutral-300 text-neutral-600">
-                                                {job.type}
-                                            </span>
-                                        </div>
+                                        )}
                                     </div>
 
                                     {/* Footer */}
                                     <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between">
-                                        <span className="text-xs text-neutral-500">Applied: {job.appliedAt}</span>
-                                        {job.responseAt && (
-                                            <span className="text-xs text-neutral-500">Response: {job.responseAt}</span>
+                                        <span className="text-xs text-neutral-500">Applied: {new Date(app.created_at).toLocaleDateString()}</span>
+                                        {app.status === 'APPLIED' && (
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAppId(app._id);
+                                                    setShowCancelModal(true);
+                                                }}
+                                                className="text-xs text-red-600 hover:text-red-700 font-medium"
+                                            >
+                                                Cancel
+                                            </button>
                                         )}
                                     </div>
                                 </motion.div>
-                            ))
-                        )}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="list"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="space-y-2"
-                    >
-                        {/* Table Header */}
-                        <div className="grid grid-cols-12 gap-4 rounded-2xl border-2 border-neutral-200 bg-white px-5 py-3 text-[11px] uppercase tracking-wider font-semibold text-neutral-500 shadow-sm">
-                            <div className="col-span-3">Job Title</div>
-                            <div className="col-span-3">{isDaily ? 'Employer' : 'Company'}</div>
-                            <div className="col-span-2">{isDaily ? 'Earnings' : 'Salary'}</div>
-                            <div className="col-span-2">Status</div>
-                            <div className="col-span-2 text-right">{isDaily ? 'Rating' : 'Applied'}</div>
-                        </div>
+                            ))}
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="list"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="space-y-3"
+                        >
+                            {filteredApplications.map((app, index) => (
+                                <motion.div
+                                    key={app._id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.03 }}
+                                    className="flex items-center gap-4 p-4 rounded-xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all"
+                                >
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <h3 className="text-base font-semibold text-neutral-800">{app.job_snapshot.title}</h3>
+                                            {getStatusBadge(app.status)}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-sm text-neutral-600">
+                                            <div className="flex items-center gap-1">
+                                                <MapPin size={13} />
+                                                <span>{app.job_snapshot.location}</span>
+                                            </div>
+                                            {isDaily && app.daily_meta && (
+                                                <div className="flex items-center gap-1">
+                                                    <IndianRupee size={13} />
+                                                    <span className="font-medium">₹{app.daily_meta.final_agreed_price || app.daily_meta.original_price}</span>
+                                                </div>
+                                            )}
+                                            <span className="text-xs text-neutral-500">Applied: {new Date(app.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                    {app.status === 'APPLIED' && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedAppId(app._id);
+                                                setShowCancelModal(true);
+                                            }}
+                                            className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            )}
 
-                        {isDaily ? (
-                            dailyJobs.map((job, index) => (
-                                <motion.div
-                                    key={job.id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-200"
-                                >
-                                    <div className="col-span-3 flex items-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-neutral-800" />
-                                        <div>
-                                            <div className="text-sm font-medium text-neutral-800">{job.title}</div>
-                                            <span className="text-xs text-neutral-500">{job.location}</span>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-3 text-sm text-neutral-600">{job.employer}</div>
-                                    <div className="col-span-2 text-sm font-semibold text-neutral-700">{job.pay}</div>
-                                    <div className="col-span-2">{getStatusBadge('completed')}</div>
-                                    <div className="col-span-2 flex items-center justify-end gap-1">
-                                        <Star size={14} className="fill-amber-400 text-amber-400" />
-                                        <span className="text-sm font-medium text-neutral-700">{job.rating}</span>
-                                    </div>
-                                </motion.div>
-                            ))
-                        ) : (
-                            longTermJobs.map((job, index) => (
-                                <motion.div
-                                    key={job.id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="group grid grid-cols-12 gap-4 items-center cursor-pointer px-5 py-4 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-200"
-                                >
-                                    <div className="col-span-3 flex items-center gap-3">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${job.status === 'selected' ? 'bg-emerald-500' :
-                                            job.status === 'rejected' ? 'bg-red-500' :
-                                                'bg-amber-500'
-                                            }`} />
-                                        <div>
-                                            <div className="text-sm font-medium text-neutral-800">{job.title}</div>
-                                            <span className="text-xs text-neutral-500">{job.location}</span>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-3 text-sm text-neutral-600">{job.company}</div>
-                                    <div className="col-span-2 text-sm font-medium text-neutral-700">{job.salary}</div>
-                                    <div className="col-span-2">{getStatusBadge(job.status)}</div>
-                                    <div className="col-span-2 text-xs text-neutral-500 text-right">{job.appliedAt}</div>
-                                </motion.div>
-                            ))
-                        )}
-                    </motion.div>
+            {/* Cancel Confirmation Modal */}
+            <AnimatePresence>
+                {showCancelModal && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                            onClick={() => !cancellingId && setShowCancelModal(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-[101]"
+                        >
+                            <div className="bg-white rounded-2xl p-6 shadow-2xl">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-bold text-neutral-900">Cancel Application?</h3>
+                                    <button 
+                                        onClick={() => !cancellingId && setShowCancelModal(false)}
+                                        className="text-neutral-500 hover:text-neutral-700"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <p className="text-neutral-600 mb-6">
+                                    Are you sure you want to cancel this application? This action cannot be undone.
+                                    {isDaily && <span className="block mt-2 text-sm text-red-600">Note: You can only cancel if the job starts in more than 30 minutes.</span>}
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowCancelModal(false)}
+                                        disabled={!!cancellingId}
+                                        className="flex-1 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                                    >
+                                        Keep Application
+                                    </button>
+                                    <button
+                                        onClick={handleCancelApplication}
+                                        disabled={!!cancellingId}
+                                        className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {cancellingId ? <><Loader2 size={16} className="animate-spin" /> Cancelling...</> : 'Cancel Application'}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
-            </div>
+        </div>
         </div>
     );
 };
