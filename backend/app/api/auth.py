@@ -1,16 +1,30 @@
 """
 Authentication API routes
-Defines endpoints for signup, login, logout, and user verification
+Defines endpoints for signup, login, logout, user verification, and profile management
 """
 from fastapi import APIRouter, HTTPException, status, Response, Cookie, Header
 from typing import Optional
+from pydantic import BaseModel
 from app.schemas.auth import SignupRequest, LoginRequest, TokenResponse, ErrorResponse
 from app.services.auth_service import AuthService
 from app.core.config import settings
+from app.core.database import Database
+from datetime import datetime
 
 
 # Create router for authentication endpoints
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+
+
+class UpdateProfileRequest(BaseModel):
+    """Request schema for updating user profile"""
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    skills: Optional[list] = None
+    experience: Optional[str] = None
 
 
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -233,3 +247,93 @@ async def verify_token(
         "message": "Token is valid",
         "user": user_data
     }
+
+
+@router.put("/profile")
+async def update_profile(
+    profile_data: UpdateProfileRequest,
+    access_token: Optional[str] = Cookie(None, alias=settings.COOKIE_NAME),
+    authorization: Optional[str] = Header(None)
+):
+    """
+    Update user profile information
+    
+    Args:
+        profile_data: Updated profile information
+        access_token: JWT token from cookie
+        authorization: Bearer token from Authorization header
+        
+    Returns:
+        Updated user data
+        
+    Raises:
+        HTTPException 401: If not authenticated
+        HTTPException 500: If update fails
+    """
+    # Get token
+    token = access_token
+    if not token and authorization:
+        parts = authorization.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1]
+    
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
+    # Verify token and get user
+    user_data = await AuthService.verify_user_token(token)
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
+    
+    try:
+        users_collection = Database.get_collection("users")
+        
+        # Prepare update data
+        update_dict = {k: v for k, v in profile_data.model_dump().items() if v is not None}
+        if not update_dict:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No data provided to update"
+            )
+        
+        update_dict["updated_at"] = datetime.utcnow()
+        
+        # Update user profile
+        from bson import ObjectId
+        result = await users_collection.update_one(
+            {"_id": ObjectId(user_data["user_id"])},
+            {"$set": update_dict}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update profile"
+            )
+        
+        # Get updated user data
+        updated_user = await users_collection.find_one({"_id": ObjectId(user_data["user_id"])})
+        updated_user["_id"] = str(updated_user["_id"])
+        
+        # Remove sensitive data
+        updated_user.pop("password", None)
+        
+        return {
+            "message": "Profile updated successfully",
+            "user": updated_user
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error updating profile: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update profile"
+        )
