@@ -67,6 +67,7 @@ class ApplicationService:
         try:
             jobs_collection = Database.get_collection("jobs")
             applications_collection = Database.get_collection("applications")
+            users_collection = Database.get_collection("users")
             
             # Get job details
             job = await jobs_collection.find_one({"_id": ObjectId(application_data.job_id)})
@@ -81,9 +82,13 @@ class ApplicationService:
             if existing:
                 return None  # Already applied
             
+            # Get user profile for auto-populating application
+            user_profile = await users_collection.find_one({"_id": ObjectId(user_id)})
+            
             # Prepare application document
             application = {
                 "worker_id": user_id,
+                "worker_email": user_email,
                 "job_id": application_data.job_id,
                 "provider_id": job.get("employer_id", ""),
                 "job_snapshot": {
@@ -97,19 +102,24 @@ class ApplicationService:
                 "updated_at": datetime.utcnow()
             }
             
-            # Add type-specific metadata
+            # Add type-specific metadata with user profile info
             if application_data.job_type == "daily":
                 application["daily_meta"] = {
                     "original_price": job.get("salary", {}).get("amount", 0),
                     "final_agreed_price": application_data.offered_price or job.get("salary", {}).get("amount", 0),
                     "is_locked": True,
-                    "negotiation_history": []
+                    "negotiation_history": [],
+                    "worker_skills": user_profile.get("skills", []) if user_profile else [],
+                    "worker_experience": user_profile.get("experience", "") if user_profile else ""
                 }
             else:  # longterm
                 application["long_term_meta"] = {
-                    "resume_url": application_data.resume_url,
+                    "resume_url": application_data.resume_url or user_profile.get("resume_url", "") if user_profile else "",
                     "match_score": None,
-                    "cover_letter": application_data.cover_letter
+                    "cover_letter": application_data.cover_letter or f"I am interested in the {job.get('title')} position. {user_profile.get('experience', '') if user_profile else ''}",
+                    "worker_skills": user_profile.get("skills", []) if user_profile else [],
+                    "worker_phone": user_profile.get("phone", "") if user_profile else "",
+                    "worker_name": user_profile.get("full_name", user_email) if user_profile else user_email
                 }
             
             # Insert application

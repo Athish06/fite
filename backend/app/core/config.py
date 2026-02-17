@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """
     
     # JWT Configuration
-    JWT_SECRET: str  # Secret key for JWT token generation and verification
+    JWT_SECRET: str = "my_super_long_random_secret_123456789"  # Secret key for JWT token generation and verification
     JWT_ALGORITHM: str = "HS256"  # Algorithm used for JWT encoding
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # Token expiry: 7 days
     

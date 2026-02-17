@@ -32,7 +32,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (response.ok) {
                 const data = await response.json();
-                setUser(data);
+                // Backend returns {message, user}, we need just the user object
+                setUser(data.user || data);
             } else {
                 setUser(null);
             }

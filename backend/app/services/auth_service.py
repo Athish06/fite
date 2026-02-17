@@ -27,13 +27,17 @@ class AuthService:
         Returns:
             UserResponse if successful, None if user already exists
         """
-        # Get users collection from database
-        users_collection = Database.get_collection("users")
-        
-        # Check if user already exists
-        existing_user = await users_collection.find_one({"email": signup_data.email})
-        if existing_user:
-            return None  # User already exists
+        try:
+            # Get users collection from database
+            users_collection = Database.get_collection("users")
+            
+            # Check if user already exists
+            existing_user = await users_collection.find_one({"email": signup_data.email})
+            if existing_user:
+                return None  # User already exists
+        except Exception as e:
+            print(f"❌ Database error in create_user: {e}")
+            raise Exception("Database connection error. Please ensure MongoDB is connected.")
         
         # Hash the password using bcrypt
         hashed_pwd = hash_password(signup_data.password)
@@ -69,13 +73,17 @@ class AuthService:
         Returns:
             Dictionary with user data and token if successful, None if invalid credentials
         """
-        # Get users collection from database
-        users_collection = Database.get_collection("users")
-        
-        # Find user by email
-        user = await users_collection.find_one({"email": login_data.email})
-        if not user:
-            return None  # User not found
+        try:
+            # Get users collection from database
+            users_collection = Database.get_collection("users")
+            
+            # Find user by email
+            user = await users_collection.find_one({"email": login_data.email})
+            if not user:
+                return None  # User not found
+        except Exception as e:
+            print(f"❌ Database error in authenticate_user: {e}")
+            raise Exception("Database connection error. Please ensure MongoDB is connected.")
         
         # Verify password against hashed password
         if not verify_password(login_data.password, user["hashed_password"]):
@@ -154,14 +162,16 @@ class AuthService:
         if not email:
             return None
         
-        # Get user from database
-        user = await AuthService.get_current_user(email)
-        if not user:
+        # Get user from database (raw document to access _id)
+        users_collection = Database.get_collection("users")
+        user_doc = await users_collection.find_one({"email": email})
+        if not user_doc:
             return None
         
-        # Return user data
+        # Return user data with user_id
         return {
-            "email": user.email,
-            "role": user.role,
-            "is_active": user.is_active
+            "user_id": str(user_doc["_id"]),
+            "email": user_doc["email"],
+            "role": user_doc["role"],
+            "is_active": user_doc["is_active"]
         }

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useMode } from '../../context/ModeContext';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, Map, MapPin, Clock, IndianRupee, Star, Play, Square, Loader2, Navigation, Phone, X, Briefcase, ChevronDown, Filter } from 'lucide-react';
+import { LayoutGrid, Map, MapPin, Clock, IndianRupee, Star, Play, Square, Loader2, Navigation, Phone, X, Briefcase, ChevronDown, Filter, CheckCircle } from 'lucide-react';
 import TextType from '../../components/ui/TextType';
 import { LocationMap } from '../../components/ui/expand-map';
 
@@ -27,21 +28,30 @@ interface LongTermJob {
     title: string;
     company: string;
     location: string;
+    address: string;
     salary: string;
     type: string;
     requirements: string[];
+    skills: string[];
     description: string;
     postedAt: string;
+    coordinates: [number, number];
+    work_hours?: string;
 }
 
 const ExploreJobs: React.FC = () => {
     const { mode } = useMode();
+    const navigate = useNavigate();
     const [viewMode, setViewMode] = useState<'card' | 'map'>('card');
     const [isExploring, setIsExploring] = useState(false);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [foundJobs, setFoundJobs] = useState<Job[]>([]);
-    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+    const [longTermJobs, setLongTermJobs] = useState<LongTermJob[]>([]);
+    const [selectedJob, setSelectedJob] = useState<Job | LongTermJob | null>(null);
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    const [isLoadingJobs, setIsLoadingJobs] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [appliedJobTitle, setAppliedJobTitle] = useState('');
 
     // Filter states for daily wage mode
     const [showFilters, setShowFilters] = useState(false);
@@ -52,94 +62,56 @@ const ExploreJobs: React.FC = () => {
 
     const isDaily = mode === 'daily';
 
-    // Mock data for daily wage jobs
-    const mockDailyJobs: Job[] = [
-        {
-            id: 1,
-            title: "Plumbing Work",
-            location: "Indiranagar",
-            address: "123 MG Road, Indiranagar, Bangalore",
-            pay: "₹800/day",
-            time: "9 AM - 6 PM",
-            employer: "Rahul Sharma",
-            employerRating: 4.8,
-            employerAvatar: "https://i.pravatar.cc/150?img=11",
-            distance: "1.2 km",
-            skills: ["Plumbing", "Pipe Fitting", "Leak Repair"],
-            description: "Need an experienced plumber for bathroom renovation work. Must have own tools.",
-            postedAt: "30 mins ago",
-            coordinates: [12.9716, 77.6046]
-        },
-        {
-            id: 2,
-            title: "Electrical Wiring",
-            location: "Koramangala",
-            address: "456 80 Feet Road, Koramangala, Bangalore",
-            pay: "₹1,000/day",
-            time: "10 AM - 5 PM",
-            employer: "Priya Patel",
-            employerRating: 4.9,
-            employerAvatar: "https://i.pravatar.cc/150?img=25",
-            distance: "2.5 km",
-            skills: ["Electrical", "Wiring", "Circuit Repair"],
-            description: "Looking for electrician for complete house wiring. Safety equipment provided.",
-            postedAt: "1 hour ago",
-            coordinates: [12.9352, 77.6245]
-        },
-        {
-            id: 3,
-            title: "House Painting",
-            location: "HSR Layout",
-            address: "789 Sector 7, HSR Layout, Bangalore",
-            pay: "₹900/day",
-            time: "8 AM - 4 PM",
-            employer: "Vikram Kumar",
-            employerRating: 4.5,
-            employerAvatar: "https://i.pravatar.cc/150?img=33",
-            distance: "3.8 km",
-            skills: ["Painting", "Wall Preparation", "Color Mixing"],
-            description: "Need painters for 3BHK apartment. Paint and materials provided.",
-            postedAt: "2 hours ago",
-            coordinates: [12.9121, 77.6446]
+    // Fetch long-term jobs when in long-term mode
+    React.useEffect(() => {
+        if (!isDaily) {
+            fetchLongTermJobs();
         }
-    ];
+    }, [isDaily]);
 
-    // Mock data for long-term jobs
-    const mockLongTermJobs: LongTermJob[] = [
-        {
-            id: 1,
-            title: "Frontend Developer",
-            company: "TechCorp Solutions",
-            location: "Bangalore (Hybrid)",
-            salary: "₹12-15 LPA",
-            type: "Full-time",
-            requirements: ["React", "TypeScript", "3+ years experience"],
-            description: "Looking for experienced frontend developers to join our product team.",
-            postedAt: "1 day ago"
-        },
-        {
-            id: 2,
-            title: "UI/UX Designer",
-            company: "DesignHub India",
-            location: "Remote",
-            salary: "₹8-12 LPA",
-            type: "Full-time",
-            requirements: ["Figma", "User Research", "2+ years experience"],
-            description: "Join our design team to create beautiful user experiences.",
-            postedAt: "2 days ago"
-        },
-        {
-            id: 3,
-            title: "React Developer Intern",
-            company: "StartupXYZ",
-            location: "Bangalore",
-            salary: "₹25,000/month",
-            type: "Internship",
-            requirements: ["React Basics", "JavaScript", "Fresh Graduate"],
-            description: "6-month internship with opportunity for full-time conversion.",
-            postedAt: "3 days ago"
+    const fetchLongTermJobs = async () => {
+        try {
+            setIsLoadingJobs(true);
+            const response = await fetch('http://localhost:8000/api/jobs?job_type=long_term&status=open', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            setLongTermJobs(data.jobs || []);
+        } catch (error) {
+            console.error('Error fetching long-term jobs:', error);
+            setLongTermJobs([]);
+        } finally {
+            setIsLoadingJobs(false);
         }
-    ];
+    };
+
+    const fetchNearbyJobs = async (lat: number, lng: number) => {
+        try {
+            const radius = distanceFilter === 'all' ? 50 : parseInt(distanceFilter);
+            let url = `http://localhost:8000/api/jobs/nearby?lat=${lat}&lng=${lng}&radius=${radius}&job_type=daily_wage`;
+            
+            const response = await fetch(url, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            let jobs = data.jobs || [];
+            
+            // Apply pay filters if set
+            if (payMin || payMax) {
+                jobs = jobs.filter((job: Job) => {
+                    const payAmount = parseInt(job.pay.replace(/[^0-9]/g, ''));
+                    const min = payMin ? parseInt(payMin) : 0;
+                    const max = payMax ? parseInt(payMax) : Infinity;
+                    return payAmount >= min && payAmount <= max;
+                });
+            }
+            
+            setFoundJobs(jobs);
+        } catch (error) {
+            console.error('Error fetching nearby jobs:', error);
+            setFoundJobs([]);
+        }
+    };
 
     const requestLocationAndStart = () => {
         setShowLocationPermission(true);
@@ -151,28 +123,36 @@ const ExploreJobs: React.FC = () => {
 
         // Get user location
         navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setUserLocation([position.coords.latitude, position.coords.longitude]);
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                setUserLocation([lat, lng]);
                 setIsExploring(true);
                 setIsLoadingLocation(false);
 
-                // Simulate finding jobs after a delay
-                setTimeout(() => {
-                    setFoundJobs(mockDailyJobs);
-                }, 2000);
+                // Fetch nearby jobs from backend
+                await fetchNearbyJobs(lat, lng);
             },
-            () => {
-                // Fallback to Bangalore coordinates
-                setUserLocation([12.9716, 77.5946]);
+            async () => {
+                // Fallback to Bangalore coordinates if location access denied
+                const lat = 12.9716;
+                const lng = 77.5946;
+                setUserLocation([lat, lng]);
                 setIsExploring(true);
                 setIsLoadingLocation(false);
 
-                setTimeout(() => {
-                    setFoundJobs(mockDailyJobs);
-                }, 2000);
+                // Fetch nearby jobs with fallback location
+                await fetchNearbyJobs(lat, lng);
             }
         );
     };
+
+    // Re-fetch jobs when filters change
+    React.useEffect(() => {
+        if (isExploring && userLocation && isDaily) {
+            fetchNearbyJobs(userLocation[0], userLocation[1]);
+        }
+    }, [distanceFilter, payMin, payMax]);
 
     const stopExploring = () => {
         setIsExploring(false);
@@ -190,6 +170,11 @@ const ExploreJobs: React.FC = () => {
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return (R * c).toFixed(1) + " km";
+    };
+
+    // Helper to determine if a job is a daily wage job (vs long-term)
+    const isDailyWageJob = (job: Job | LongTermJob): job is Job => {
+        return 'employer' in job;
     };
 
     return (
@@ -580,63 +565,87 @@ const ExploreJobs: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+                        className="relative z-10"
                     >
-                        {mockLongTermJobs.map((job, index) => (
-                            <motion.div
-                                key={job.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
-                            >
-                                {/* Accent Line */}
-                                <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-600" />
-
-                                {/* Header */}
-                                <div className="flex items-start justify-between mb-2">
-                                    <h3 className="text-lg font-semibold text-neutral-800 pr-3">{job.title}</h3>
-                                    <span className="shrink-0 text-xs px-2 py-0.5 rounded-md border border-neutral-300 text-neutral-600">
-                                        {job.type}
-                                    </span>
-                                </div>
-
-                                {/* Company */}
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Briefcase size={14} className="text-neutral-500" />
-                                    <span className="text-sm font-medium text-neutral-700">{job.company}</span>
-                                </div>
-
-                                {/* Metrics */}
-                                <div className="space-y-2 mb-4">
-                                    <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                        <MapPin size={14} className="text-neutral-500" />
-                                        <span>{job.location}</span>
+                        {isLoadingJobs ? (
+                            <div className="flex flex-col items-center justify-center py-20">
+                                <Loader2 size={48} className="text-neutral-400 animate-spin mb-4" />
+                                <p className="text-neutral-600">Loading jobs...</p>
+                            </div>
+                        ) : longTermJobs.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20">
+                                <div className="p-8 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm text-center max-w-md">
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
+                                        <Briefcase size={32} className="text-neutral-600" />
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-neutral-700">
-                                        <IndianRupee size={14} className="text-neutral-500" />
-                                        <span className="font-medium">{job.salary}</span>
-                                    </div>
+                                    <h2 className="text-xl font-semibold text-neutral-800 mb-2">No Jobs Found</h2>
+                                    <p className="text-neutral-600">
+                                        No long-term job opportunities are currently available. Check back later!
+                                    </p>
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                {longTermJobs.map((job, index) => (
+                                    <motion.div
+                                        key={job.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        onClick={() => setSelectedJob(job)}
+                                        className="group relative cursor-pointer p-5 rounded-2xl border-2 border-neutral-200 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-300"
+                                    >
+                                        {/* Accent Line */}
+                                        <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-neutral-600" />
 
-                                {/* Requirements */}
-                                <div className="flex flex-wrap gap-1 mb-3">
-                                    {job.requirements.map((req) => (
-                                        <span key={req} className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600">
-                                            {req}
-                                        </span>
-                                    ))}
-                                </div>
+                                        {/* Header */}
+                                        <div className="flex items-start justify-between mb-2">
+                                            <h3 className="text-lg font-semibold text-neutral-800 pr-3">{job.title}</h3>
+                                            <span className="shrink-0 text-xs px-2 py-0.5 rounded-md border border-neutral-300 text-neutral-600">
+                                                {job.type}
+                                            </span>
+                                        </div>
 
-                                {/* Footer */}
-                                <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between">
-                                    <span className="text-xs text-neutral-500">{job.postedAt}</span>
-                                    <button className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white text-xs font-medium hover:bg-neutral-800 transition-colors">
-                                        Apply Now
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
+                                        {/* Company */}
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Briefcase size={14} className="text-neutral-500" />
+                                            <span className="text-sm font-medium text-neutral-700">{job.company}</span>
+                                        </div>
+
+                                        {/* Metrics */}
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                <MapPin size={14} className="text-neutral-500" />
+                                                <span>{job.location}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-neutral-700">
+                                                <IndianRupee size={14} className="text-neutral-500" />
+                                                <span className="font-medium">{job.salary}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Requirements */}
+                                        <div className="flex flex-wrap gap-1 mb-3">
+                                            {job.requirements.slice(0, 3).map((req) => (
+                                                <span key={req} className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600">
+                                                    {req}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between">
+                                            <span className="text-xs text-neutral-500">{job.postedAt}</span>
+                                            <span className="text-xs text-neutral-500 flex items-center gap-1 group-hover:text-neutral-700 transition-colors">
+                                                View Details
+                                                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -674,17 +683,26 @@ const ExploreJobs: React.FC = () => {
                                 <div className="px-6 py-6 bg-neutral-50 border-b border-neutral-200">
                                     <h3 className="text-2xl font-bold text-neutral-800 mb-2">{selectedJob.title}</h3>
                                     <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <img src={selectedJob.employerAvatar} alt={selectedJob.employer} className="w-8 h-8 rounded-full" />
-                                            <span className="text-sm font-medium text-neutral-700">{selectedJob.employer}</span>
-                                            <div className="flex items-center gap-1">
-                                                <Star size={12} className="fill-amber-400 text-amber-400" />
-                                                <span className="text-sm text-neutral-600">{selectedJob.employerRating}</span>
+                                        {isDailyWageJob(selectedJob) ? (
+                                            <div className="flex items-center gap-2">
+                                                <img src={selectedJob.employerAvatar} alt={selectedJob.employer} className="w-8 h-8 rounded-full" />
+                                                <span className="text-sm font-medium text-neutral-700">{selectedJob.employer}</span>
+                                                <div className="flex items-center gap-1">
+                                                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                                                    <span className="text-sm text-neutral-600">{selectedJob.employerRating}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <span className="px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
-                                            {calculateDistance(selectedJob.coordinates)}
-                                        </span>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <Briefcase size={16} className="text-neutral-600" />
+                                                <span className="text-sm font-medium text-neutral-700">{selectedJob.company}</span>
+                                            </div>
+                                        )}
+                                        {'coordinates' in selectedJob && (
+                                            <span className="px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
+                                                {calculateDistance(selectedJob.coordinates)}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -693,12 +711,20 @@ const ExploreJobs: React.FC = () => {
                                     {/* Pay & Time */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
-                                            <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Pay</p>
-                                            <p className="text-xl font-bold text-neutral-800">{selectedJob.pay}</p>
+                                            <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">
+                                                {isDailyWageJob(selectedJob) ? 'Pay' : 'Salary'}
+                                            </p>
+                                            <p className="text-xl font-bold text-neutral-800">
+                                                {isDailyWageJob(selectedJob) ? selectedJob.pay : selectedJob.salary}
+                                            </p>
                                         </div>
                                         <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
-                                            <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Timing</p>
-                                            <p className="text-xl font-bold text-neutral-800">{selectedJob.time}</p>
+                                            <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">
+                                                {isDailyWageJob(selectedJob) ? 'Timing' : 'Job Type'}
+                                            </p>
+                                            <p className="text-xl font-bold text-neutral-800">
+                                                {isDailyWageJob(selectedJob) ? selectedJob.time : selectedJob.type}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -707,58 +733,139 @@ const ExploreJobs: React.FC = () => {
                                         <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Location</h4>
                                         <div className="flex items-start gap-2 text-neutral-600">
                                             <MapPin size={16} className="mt-0.5 shrink-0" />
-                                            <span>{selectedJob.address}</span>
+                                            <span>{selectedJob.address || selectedJob.location}</span>
                                         </div>
                                     </div>
 
                                     {/* Description */}
                                     <div>
-                                        <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Description</h4>
-                                        <p className="text-neutral-600">{selectedJob.description}</p>
+                                        <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Job Description</h4>
+                                        <p className="text-neutral-600 leading-relaxed">{selectedJob.description}</p>
                                     </div>
+
+                                    {/* Work Hours */}
+                                    {(isDailyWageJob(selectedJob) || selectedJob.work_hours) && (
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Work Hours</h4>
+                                            <div className="flex items-center gap-2 text-neutral-700">
+                                                <Clock size={16} />
+                                                <span className="font-medium">
+                                                    {isDailyWageJob(selectedJob) ? selectedJob.time : selectedJob.work_hours}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Skills Required */}
                                     <div>
                                         <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Skills Required</h4>
                                         <div className="flex flex-wrap gap-2">
-                                            {selectedJob.skills.map((skill) => (
-                                                <span key={skill} className="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-700 text-sm font-medium border border-neutral-200">
+                                            {(isDailyWageJob(selectedJob) ? selectedJob.skills : selectedJob.skills || selectedJob.requirements).map((skill) => (
+                                                <span key={skill} className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-200">
                                                     {skill}
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
 
-                                    {/* Map Preview - Expandable Card */}
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Job Location</h4>
-                                        <LocationMap
-                                            location={selectedJob.address}
-                                            coordinates={`${selectedJob.coordinates[0].toFixed(4)}° N, ${selectedJob.coordinates[1].toFixed(4)}° E`}
-                                            isDark={false}
-                                        />
+                                    {/* Job Posted */}
+                                    <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                                        <span className="text-sm text-neutral-500">Posted {selectedJob.postedAt}</span>
+                                        <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                                            Open Position
+                                        </span>
                                     </div>
+
+                                    {/* Map Preview - Expandable Card */}
+                                    {'coordinates' in selectedJob && (
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Job Location</h4>
+                                            <LocationMap
+                                                location={selectedJob.address || selectedJob.location}
+                                                coordinates={`${selectedJob.coordinates[0].toFixed(4)}° N, ${selectedJob.coordinates[1].toFixed(4)}° E`}
+                                                isDark={false}
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Actions */}
                                     <div className="flex flex-col gap-3 pt-4">
-                                        <div className="flex gap-3">
-                                            <a
-                                                href={`tel:+919876543210`}
-                                                className="flex-1 py-3 rounded-lg bg-neutral-200 text-neutral-700 font-semibold text-sm hover:bg-neutral-300 transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                <Phone size={16} />
-                                                Call Employer
-                                            </a>
-                                            <button
-                                                className="flex-1 py-3 rounded-lg border-2 border-amber-500 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors"
-                                            >
-                                                💬 Negotiate Price
-                                            </button>
-                                        </div>
+                                        {isDailyWageJob(selectedJob) && (
+                                            <div className="flex gap-3">
+                                                <a
+                                                    href={`tel:+919876543210`}
+                                                    className="flex-1 py-3 rounded-lg bg-neutral-200 text-neutral-700 font-semibold text-sm hover:bg-neutral-300 transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <Phone size={16} />
+                                                    Call Employer
+                                                </a>
+                                                <button
+                                                    className="flex-1 py-3 rounded-lg border-2 border-amber-500 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors"
+                                                >
+                                                    💬 Negotiate Price
+                                                </button>
+                                            </div>
+                                        )}
                                         <button
-                                            className="w-full py-3 rounded-lg bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-700 transition-colors"
+                                            onClick={async () => {
+                                                try {
+                                                    const isDailyJob = isDailyWageJob(selectedJob);
+                                                    let requestBody;
+                                                    
+                                                    if (isDailyJob) {
+                                                        // Extract pay amount from string like "₹800/day"
+                                                        const payAmount = parseFloat(selectedJob.pay.replace(/[^0-9.]/g, ''));
+                                                        requestBody = {
+                                                            job_id: selectedJob.id,
+                                                            job_type: "daily",
+                                                            offered_price: payAmount
+                                                        };
+                                                    } else {
+                                                        // Long-term job application
+                                                        requestBody = {
+                                                            job_id: selectedJob.id,
+                                                            job_type: "longterm",
+                                                            cover_letter: `I am very interested in the ${selectedJob.title} position at ${selectedJob.company}. I believe my skills and experience make me a great fit for this role.`
+                                                        };
+                                                    }
+                                                    
+                                                    const response = await fetch('http://localhost:8000/api/applications/apply', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        credentials: 'include',
+                                                        body: JSON.stringify(requestBody)
+                                                    });
+                                                    
+                                                    if (response.ok) {
+                                                        setAppliedJobTitle(selectedJob.title);
+                                                        setShowSuccessModal(true);
+                                                        setSelectedJob(null);
+                                                        // Remove applied job from list
+                                                        if (isDailyJob) {
+                                                            setFoundJobs(prev => prev.filter(j => j.id !== selectedJob.id));
+                                                        } else {
+                                                            setLongTermJobs(prev => prev.filter(j => j.id !== selectedJob.id));
+                                                        }
+                                                    } else {
+                                                        const error = await response.json();
+                                                        if (response.status === 401) {
+                                                            alert('Please login to apply for jobs.');
+                                                            navigate('/login');
+                                                        } else if (error.detail && error.detail.includes('already applied')) {
+                                                            alert('You have already applied to this job.');
+                                                        } else {
+                                                            alert(error.detail || 'Failed to apply. Please try again.');
+                                                        }
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Error applying:', error);
+                                                    alert('Failed to submit application. Please check your connection and try again.');
+                                                }
+                                            }}
+                                            className="w-full py-3 rounded-lg bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
                                         >
-                                            Accept Job
+                                            <CheckCircle size={18} />
+                                            Apply for This Job
                                         </button>
                                     </div>
                                 </div>
@@ -805,6 +912,65 @@ const ExploreJobs: React.FC = () => {
                                         className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors"
                                     >
                                         Allow & Start
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
+            {/* Success Modal - After Application Submitted */}
+            <AnimatePresence>
+                {showSuccessModal && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
+                            onClick={() => setShowSuccessModal(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-white rounded-2xl shadow-2xl z-[101] p-6"
+                        >
+                            <div className="text-center">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                                    <CheckCircle size={32} className="text-emerald-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-neutral-800 mb-2">Application Submitted Successfully!</h3>
+                                <p className="text-neutral-600 mb-2">
+                                    Your application for <span className="font-semibold">{appliedJobTitle}</span> has been submitted with your profile information.
+                                </p>
+                                <p className="text-sm text-neutral-500 mb-6">
+                                    The employer will review your skills, experience, and details, and get back to you soon.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowSuccessModal(false);
+                                            if (isDaily) {
+                                                setFoundJobs([]);
+                                                setIsExploring(false);
+                                            } else {
+                                                fetchLongTermJobs();
+                                            }
+                                        }}
+                                        className="flex-1 py-3 rounded-xl border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors"
+                                    >
+                                        Continue Exploring
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowSuccessModal(false);
+                                            navigate('/applied-jobs');
+                                        }}
+                                        className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors"
+                                    >
+                                        View My Applications
                                     </button>
                                 </div>
                             </div>

@@ -60,8 +60,8 @@ async def get_my_applications(
     """
     user = await get_current_user_from_token(access_token, authorization)
     
-    # Use email as user_id (since that's what we store in the token)
-    user_id = user.get("email")
+    # Use user_id from token
+    user_id = user.get("user_id")
     
     applications = await ApplicationService.get_user_applications(user_id, status_filter)
     
@@ -83,7 +83,7 @@ async def apply_to_job(
     """
     user = await get_current_user_from_token(access_token, authorization)
     
-    user_id = user.get("email")
+    user_id = user.get("user_id")
     user_email = user.get("email")
     
     application = await ApplicationService.apply_to_job(
@@ -116,7 +116,7 @@ async def cancel_application(
     """
     user = await get_current_user_from_token(access_token, authorization)
     
-    user_id = user.get("email")
+    user_id = user.get("user_id")
     
     result = await ApplicationService.cancel_application(
         user_id,
@@ -146,7 +146,7 @@ async def get_application(
     """
     user = await get_current_user_from_token(access_token, authorization)
     
-    user_id = user.get("email")
+    user_id = user.get("user_id")
     
     application = await ApplicationService.get_application_by_id(application_id, user_id)
     

@@ -95,6 +95,33 @@ async def get_jobs(
     }
 
 
+@router.get("/nearby")
+async def get_nearby_jobs(
+    lat: float,
+    lng: float,
+    radius: float = 10,
+    job_type: Optional[str] = None,
+    limit: int = 20
+):
+    """
+    Get jobs near a location
+    Public endpoint - no authentication required
+    
+    Query params:
+        lat: User latitude
+        lng: User longitude
+        radius: Search radius in kilometers (default: 10)
+        job_type: Filter by daily_wage or long_term
+        limit: Maximum results (default: 20)
+    """
+    jobs = await JobService.get_nearby_jobs(lat, lng, radius, job_type, limit)
+    
+    return {
+        "jobs": jobs,
+        "count": len(jobs)
+    }
+
+
 @router.get("/my-jobs")
 async def get_my_posted_jobs(
     access_token: Optional[str] = Cookie(None, alias=settings.COOKIE_NAME),

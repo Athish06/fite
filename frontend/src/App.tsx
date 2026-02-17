@@ -40,11 +40,9 @@ const App: React.FC = () => {
               {/* Public route - Login/Signup */}
               <Route path="/login" element={<LoginSignup />} />
               
-              {/* Default route - Redirect to login */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              
               {/* Protected routes - Require authentication */}
               <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                <Route index element={<Home />} />
                 <Route path="home" element={<Home />} />
                 <Route path="posted-jobs" element={<PostedJobs />} />
                 <Route path="job-detail/:mode/:jobId" element={<JobDetail />} />
@@ -56,6 +54,9 @@ const App: React.FC = () => {
                 <Route path="explore-jobs" element={<ExploreJobs />} />
                 <Route path="settings" element={<UserSettings />} />
               </Route>
+              
+              {/* Catch all - redirect to login */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </Router>
         </AuthProvider>

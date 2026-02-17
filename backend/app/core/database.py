@@ -22,8 +22,11 @@ class Database:
         Creates connection to cluster0 and selects 'fite' database
         """
         try:
-            # Create async MongoDB client
-            cls.client = AsyncIOMotorClient(settings.MONGO_URL)
+            # Create async MongoDB client with shorter timeout
+            cls.client = AsyncIOMotorClient(
+                settings.MONGO_URL,
+                serverSelectionTimeoutMS=5000  # 5 second timeout instead of 30
+            )
             
             # Test the connection by pinging the database
             await cls.client.admin.command('ping')
@@ -31,7 +34,8 @@ class Database:
             
         except Exception as e:
             print(f"❌ Error connecting to MongoDB: {e}")
-            raise e
+            # Don't raise - let caller decide what to do
+            cls.client = None
     
     @classmethod
     async def close_db(cls):
@@ -50,7 +54,7 @@ class Database:
         Returns the 'fite' database from cluster0
         """
         if not cls.client:
-            raise Exception("Database not connected. Call connect_db() first.")
+            raise Exception("Database not connected. Please check your MongoDB connection settings and IP whitelist in MongoDB Atlas.")
         return cls.client[settings.DATABASE_NAME]
     
     @classmethod

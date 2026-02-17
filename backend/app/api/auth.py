@@ -42,14 +42,22 @@ async def signup(signup_data: SignupRequest, response: Response):
     Raises:
         HTTPException 400: If user already exists
     """
-    # Create new user using auth service
-    user = await AuthService.create_user(signup_data)
-    
-    if not user:
-        # User already exists
+    try:
+        # Create new user using auth service
+        user = await AuthService.create_user(signup_data)
+        
+        if not user:
+            # User already exists
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this email already exists"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(e)
         )
     
     # Authenticate the newly created user to get token
@@ -96,14 +104,22 @@ async def login(login_data: LoginRequest, response: Response):
     Raises:
         HTTPException 401: If credentials are invalid
     """
-    # Authenticate user using auth service
-    auth_result = await AuthService.authenticate_user(login_data)
-    
-    if not auth_result:
-        # Invalid credentials or inactive account
+    try:
+        # Authenticate user using auth service
+        auth_result = await AuthService.authenticate_user(login_data)
+        
+        if not auth_result:
+            # Invalid credentials or inactive account
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(e)
         )
     
     # Set JWT token in httpOnly cookie

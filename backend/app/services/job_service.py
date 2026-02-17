@@ -14,6 +14,75 @@ class JobService:
     """Service class for job operations"""
     
     @staticmethod
+    def format_job_for_frontend(job: Dict) -> Dict:
+        """
+        Format job data for frontend consumption
+        Transforms backend job structure to match frontend expectations
+        """
+        # Calculate time ago
+        created_at = job.get("created_at", datetime.utcnow())
+        time_diff = datetime.utcnow() - created_at
+        if time_diff.days > 0:
+            time_ago = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
+        elif time_diff.seconds >= 3600:
+            hours = time_diff.seconds // 3600
+            time_ago = f"{hours} hour{'s' if hours > 1 else ''} ago"
+        else:
+            minutes = time_diff.seconds // 60
+            time_ago = f"{minutes if minutes > 0 else 1} min{'s' if minutes > 1 else ''} ago"
+        
+        location_data = job.get("location", {})
+        salary_data = job.get("salary", {})
+        
+        if job.get("job_type") == "daily_wage":
+            # Format for daily wage frontend
+            return {
+                "id": str(job.get("_id")),
+                "title": job.get("title"),
+                "location": location_data.get("city", ""),
+                "address": location_data.get("address", ""),
+                "pay": f"₹{int(salary_data.get('amount', 0))}/{salary_data.get('period', 'day')}",
+                "time": job.get("work_hours", "Flexible"),
+                "employer": job.get("employer_name", "Anonymous"),
+                "employerRating": 4.5,  # Default rating - can be replaced with real ratings later
+                "employerAvatar": f"https://i.pravatar.cc/150?u={job.get('employer_id')}",
+                "distance": "N/A",  # Will be calculated on frontend with user location
+                "skills": job.get("skills_required", []),
+                "description": job.get("description", ""),
+                "postedAt": time_ago,
+                "coordinates": [
+                    location_data.get("coordinates", {}).get("lat", 0),
+                    location_data.get("coordinates", {}).get("lng", 0)
+                ],
+                "employer_id": job.get("employer_id"),
+                "category": job.get("category", ""),
+                "status": job.get("status", "open")
+            }
+        else:
+            # Format for long-term frontend
+            return {
+                "id": str(job.get("_id")),
+                "title": job.get("title"),
+                "company": job.get("employer_name", "Company"),
+                "location": f"{location_data.get('city', '')}, {location_data.get('state', '')}",
+                "address": location_data.get("address", ""),
+                "salary": f"₹{int(salary_data.get('amount', 0))}/{salary_data.get('period', 'month')}",
+                "type": "Full-time" if salary_data.get("period") == "monthly" else "Contract",
+                "requirements": job.get("requirements", []),
+                "skills": job.get("skills_required", []),
+                "description": job.get("description", ""),
+                "postedAt": time_ago,
+                "coordinates": [
+                    location_data.get("coordinates", {}).get("lat", 0),
+                    location_data.get("coordinates", {}).get("lng", 0)
+                ],
+                "work_hours": job.get("work_hours"),
+                "employer_id": job.get("employer_id"),
+                "category": job.get("category", ""),
+                "status": job.get("status", "open")
+            }
+    
+    @staticmethod
     async def create_job(job_data: CreateJobRequest, user_id: str, user_name: str) -> Optional[Dict]:
         """
         Create a new job posting
@@ -103,15 +172,86 @@ class JobService:
             cursor = jobs_collection.find(query).sort("created_at", -1).skip(skip).limit(limit)
             jobs = await cursor.to_list(length=limit)
             
-            # Convert ObjectId to string
+            # Format jobs for frontend
+            formatted_jobs = []
             for job in jobs:
                 job["_id"] = str(job["_id"])
-                job["applicants_count"] = len(job.get("applicants", []))
+                formatted_job = JobService.format_job_for_frontend(job)
+                formatted_jobs.append(formatted_job)
             
-            return jobs
+            return formatted_jobs
             
         except Exception as e:
             print(f"Error getting jobs: {e}")
+            return []
+    
+    @staticmethod
+    async def get_nearby_jobs(
+        lat: float,
+        lng: float,
+        radius_km: float = 10,
+        job_type: Optional[str] = None,
+        limit: int = 20
+    ) -> List[Dict]:
+        """
+        Get jobs near a location
+        
+        Args:
+            lat: User latitude
+            lng: User longitude
+            radius_km: Search radius in kilometers
+            job_type: Filter by job type
+            limit: Maximum number of results
+            
+        Returns:
+            List of nearby jobs with distance
+        """
+        try:
+            jobs_collection = Database.get_collection("jobs")
+            
+            # Build query
+            query = {"is_active": True, "status": "open"}
+            if job_type:
+                query["job_type"] = job_type
+            
+            # Fetch all jobs (we'll filter by distance manually)
+            cursor = jobs_collection.find(query).sort("created_at", -1).limit(limit * 2)
+            jobs = await cursor.to_list(length=limit * 2)
+            
+            # Calculate distances and filter
+            nearby_jobs = []
+            for job in jobs:
+                job_coords = job.get("location", {}).get("coordinates", {})
+                job_lat = job_coords.get("lat")
+                job_lng = job_coords.get("lng")
+                
+                if job_lat and job_lng:
+                    # Haversine formula for distance
+                    from math import radians, sin, cos, sqrt, atan2
+                    R = 6371  # Earth radius in km
+                    
+                    lat1, lng1 = radians(lat), radians(lng)
+                    lat2, lng2 = radians(job_lat), radians(job_lng)
+                    
+                    dlat = lat2 - lat1
+                    dlng = lng2 - lng1
+                    
+                    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+                    c = 2 * atan2(sqrt(a), sqrt(1-a))
+                    distance = R * c
+                    
+                    if distance <= radius_km:
+                        job["_id"] = str(job["_id"])
+                        formatted_job = JobService.format_job_for_frontend(job)
+                        formatted_job["distance"] = f"{distance:.1f} km"
+                        nearby_jobs.append(formatted_job)
+            
+            # Sort by distance
+            nearby_jobs.sort(key=lambda x: float(x["distance"].split()[0]))
+            return nearby_jobs[:limit]
+            
+        except Exception as e:
+            print(f"Error getting nearby jobs: {e}")
             return []
     
     @staticmethod

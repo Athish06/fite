@@ -17,8 +17,13 @@ async def lifespan(app: FastAPI):
     Application lifespan manager
     Handles startup and shutdown events
     """
-    # Startup: Connect to MongoDB
-    await Database.connect_db()
+    # Startup: Try to connect to MongoDB (non-blocking)
+    try:
+        await Database.connect_db()
+    except Exception as e:
+        print(f"⚠️  Warning: MongoDB connection failed at startup: {e}")
+        print("⚠️  App will start anyway - MongoDB will retry on first request")
+    
     print("🚀 Application startup complete")
     
     yield
@@ -40,7 +45,7 @@ app = FastAPI(
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173"],  # Frontend URLs
+    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],  # Frontend URLs
     allow_credentials=True,  # Allow cookies to be sent
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
