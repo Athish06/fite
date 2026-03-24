@@ -449,15 +449,16 @@ const ExploreJobs: React.FC = () => {
                 setNegotiationReason('');
             } else if (!negotiationId) {
                 // Start new negotiation then connect WS
+                const msgPayload = msgText.trim() || "Hi, I'd like to negotiate the price for this job.";
                 const res = await fetch(`${API_BASE}/api/negotiations/start`, {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({
-                        job_id: negotiatingJob.id,
-                        employer_id: negotiatingJob.employer_id || '',
-                        employer_name: negotiatingJob.employer,
-                        original_price: negotiatingJob.salaryAmount,
-                        message: msgText,
+                        job_id: String(negotiatingJob.id),
+                        employer_id: String(negotiatingJob.employer_id || ''),
+                        employer_name: negotiatingJob.employer || 'Employer',
+                        original_price: Number(negotiatingJob.salaryAmount || 0),
+                        message: msgPayload,
                         offer_amount: offerAmount,
                     }),
                 });

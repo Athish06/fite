@@ -36,11 +36,11 @@ import { NotificationProvider } from './context/NotificationContext';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <ModeProvider>
-        <NotificationProvider>
-          <AuthProvider>
-            <Router>
+    <Router>
+      <ThemeProvider>
+        <ModeProvider>
+          <NotificationProvider>
+            <AuthProvider>
               <Routes>
                 {/* Public route - Login/Signup */}
                 <Route path="/login" element={<LoginSignup />} />
@@ -63,11 +63,11 @@ const App: React.FC = () => {
                   <Route path="settings" element={<UserSettings />} />
                 </Route>
               </Routes>
-            </Router>
-          </AuthProvider>
-        </NotificationProvider>
-      </ModeProvider>
-    </ThemeProvider>
+            </AuthProvider>
+          </NotificationProvider>
+        </ModeProvider>
+      </ThemeProvider>
+    </Router>
   );
 };
 
