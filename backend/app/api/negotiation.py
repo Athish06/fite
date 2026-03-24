@@ -58,7 +58,7 @@ class StartNegotiationRequest(BaseModel):
     employer_id: str
     employer_name: str = "Employer"
     original_price: float
-    message: str = Field(..., min_length=1, max_length=1000)
+    message: str = Field("", max_length=1000)
     offer_amount: Optional[float] = None
 
 
@@ -137,6 +137,9 @@ async def start_negotiation(
     user = await get_current_user(access_token, authorization)
     col = _col()
 
+    # Defensive message
+    msg_text = body.message.strip() or "Hi, I'd like to negotiate the price for this job."
+    
     # Prevent duplicates
     existing = await col.find_one({
         "job_id": body.job_id,
@@ -162,7 +165,7 @@ async def start_negotiation(
         "sender_id": user["user_id"],
         "sender_role": "worker",
         "sender_name": user.get("full_name") or user.get("email", "").split("@")[0] or "Worker",
-        "message": body.message,
+        "message": msg_text,
         "offer_amount": body.offer_amount,
         "sent_at": datetime.utcnow().isoformat(),
     }
